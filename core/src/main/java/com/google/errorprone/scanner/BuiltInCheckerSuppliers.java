@@ -171,6 +171,7 @@ import com.google.errorprone.bugpatterns.ProtoStringFieldReferenceEquality;
 import com.google.errorprone.bugpatterns.ProtocolBufferOrdinal;
 import com.google.errorprone.bugpatterns.ProvidesFixChecker;
 import com.google.errorprone.bugpatterns.RandomModInteger;
+import com.google.errorprone.bugpatterns.ReachabilityFenceUsage;
 import com.google.errorprone.bugpatterns.RedundantThrows;
 import com.google.errorprone.bugpatterns.ReferenceEquality;
 import com.google.errorprone.bugpatterns.RemoveUnusedImports;
@@ -191,6 +192,7 @@ import com.google.errorprone.bugpatterns.StringEquality;
 import com.google.errorprone.bugpatterns.SuppressWarningsDeprecated;
 import com.google.errorprone.bugpatterns.TestExceptionChecker;
 import com.google.errorprone.bugpatterns.ThreadJoinLoop;
+import com.google.errorprone.bugpatterns.ThreeLetterTimeZoneID;
 import com.google.errorprone.bugpatterns.ThrowIfUncheckedKnownChecked;
 import com.google.errorprone.bugpatterns.ThrowNull;
 import com.google.errorprone.bugpatterns.ThrowsUncheckedException;
@@ -215,6 +217,7 @@ import com.google.errorprone.bugpatterns.VarChecker;
 import com.google.errorprone.bugpatterns.WaitNotInLoop;
 import com.google.errorprone.bugpatterns.WildcardImport;
 import com.google.errorprone.bugpatterns.WrongParameterPackage;
+import com.google.errorprone.bugpatterns.android.BinderIdentityRestoredDangerously;
 import com.google.errorprone.bugpatterns.android.BundleDeserializationCast;
 import com.google.errorprone.bugpatterns.android.FragmentInjection;
 import com.google.errorprone.bugpatterns.android.FragmentNotInstantiable;
@@ -493,6 +496,7 @@ public class BuiltInCheckerSuppliers {
           ParameterName.class,
           PreconditionsInvalidPlaceholder.class,
           ProtoFieldPreconditionsCheckNotNull.class,
+          ReachabilityFenceUsage.class,
           ReferenceEquality.class,
           RequiredModifiersChecker.class,
           ShortCircuitBoolean.class,
@@ -500,6 +504,7 @@ public class BuiltInCheckerSuppliers {
           StaticGuardedByInstance.class,
           SynchronizeOnNonFinalField.class,
           ThreadJoinLoop.class,
+          ThreeLetterTimeZoneID.class,
           TruthConstantAsserts.class,
           TypeParameterShadowing.class,
           TypeParameterUnusedInFormals.class,
@@ -518,6 +523,7 @@ public class BuiltInCheckerSuppliers {
           AssistedInjectAndInjectOnConstructors.class,
           AssistedInjectAndInjectOnSameConstructor.class,
           BigDecimalLiteralDouble.class,
+          BinderIdentityRestoredDangerously.class, // TODO: enable this by default.
           BindingToUnqualifiedCommonType.class,
           ClassName.class,
           ComparisonContractViolated.class,
