@@ -81,6 +81,7 @@ import com.google.errorprone.bugpatterns.GetClassOnAnnotation;
 import com.google.errorprone.bugpatterns.GetClassOnClass;
 import com.google.errorprone.bugpatterns.GetClassOnEnum;
 import com.google.errorprone.bugpatterns.HashtableContains;
+import com.google.errorprone.bugpatterns.HidingField;
 import com.google.errorprone.bugpatterns.IdentityBinaryExpression;
 import com.google.errorprone.bugpatterns.ImmutableModification;
 import com.google.errorprone.bugpatterns.IncompatibleModifiersChecker;
@@ -100,6 +101,7 @@ import com.google.errorprone.bugpatterns.IterablePathParameter;
 import com.google.errorprone.bugpatterns.JMockTestWithoutRunWithOrRuleAnnotation;
 import com.google.errorprone.bugpatterns.JUnit3FloatingPointComparisonWithoutDelta;
 import com.google.errorprone.bugpatterns.JUnit3TestNotRun;
+import com.google.errorprone.bugpatterns.JUnit4ClassAnnotationNonStatic;
 import com.google.errorprone.bugpatterns.JUnit4ClassUsedInJUnit3;
 import com.google.errorprone.bugpatterns.JUnit4SetUpNotRun;
 import com.google.errorprone.bugpatterns.JUnit4TearDownNotRun;
@@ -149,7 +151,6 @@ import com.google.errorprone.bugpatterns.OptionalEquality;
 import com.google.errorprone.bugpatterns.OptionalNotPresent;
 import com.google.errorprone.bugpatterns.OverrideThrowableToString;
 import com.google.errorprone.bugpatterns.Overrides;
-import com.google.errorprone.bugpatterns.OvershadowingSubclassFields;
 import com.google.errorprone.bugpatterns.PackageInfo;
 import com.google.errorprone.bugpatterns.PackageLocation;
 import com.google.errorprone.bugpatterns.ParameterComment;
@@ -366,6 +367,7 @@ public class BuiltInCheckerSuppliers {
           IsLoggableTagLength.class,
           JavaxInjectOnAbstractMethod.class,
           JUnit3TestNotRun.class,
+          JUnit4ClassAnnotationNonStatic.class,
           JUnit4SetUpNotRun.class,
           JUnit4TearDownNotRun.class,
           JUnit4TestNotRun.class,
@@ -447,6 +449,7 @@ public class BuiltInCheckerSuppliers {
           FunctionalInterfaceClash.class,
           FutureReturnValueIgnored.class,
           GetClassOnEnum.class,
+          HidingField.class,
           ImmutableAnnotationChecker.class,
           ImmutableEnumChecker.class,
           IncompatibleModifiersChecker.class,
@@ -479,7 +482,6 @@ public class BuiltInCheckerSuppliers {
           Overrides.class,
           OverridesGuiceInjectableMethod.class,
           OverrideThrowableToString.class,
-          OvershadowingSubclassFields.class,
           ParameterName.class,
           PreconditionsInvalidPlaceholder.class,
           ProtoFieldPreconditionsCheckNotNull.class,
