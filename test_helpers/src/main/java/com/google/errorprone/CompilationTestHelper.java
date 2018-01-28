@@ -57,7 +57,8 @@ public class CompilationTestHelper {
           "UTF-8",
           // print stack traces for completion failures
           "-XDdev",
-          "-XDsave-parameter-names");
+          "-parameters",
+          "-XDcompilePolicy=simple");
 
   private final DiagnosticTestHelper diagnosticHelper;
   private final BaseErrorProneCompiler compiler;
