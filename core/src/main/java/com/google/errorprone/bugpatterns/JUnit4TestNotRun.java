@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 The Error Prone Authors.
+ * Copyright 2013 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 import com.google.errorprone.BugPattern;
-import com.google.errorprone.BugPattern.ProvidesFix;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker.MethodTreeMatcher;
 import com.google.errorprone.fixes.SuggestedFix;
@@ -49,7 +48,6 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreeScanner;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import java.util.List;
-import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
 /** @author eaftan@google.com (Eddie Aftandilian) */
@@ -66,8 +64,7 @@ import javax.lang.model.element.Modifier;
           + "are purposely disabling it. If this is a helper method and not a test, consider "
           + "reducing its visibility to non-public, if possible.",
   category = JUNIT,
-  severity = ERROR,
-  providesFix = ProvidesFix.REQUIRES_HUMAN_ATTENTION
+  severity = ERROR
 )
 public class JUnit4TestNotRun extends BugChecker implements MethodTreeMatcher {
 
@@ -181,11 +178,10 @@ public class JUnit4TestNotRun extends BugChecker implements MethodTreeMatcher {
    * </ol>
    */
   private Description describeFixes(MethodTree methodTree, VisitorState state) {
-    Optional<SuggestedFix> removeStatic =
-        SuggestedFixes.removeModifiers(methodTree, state, Modifier.STATIC);
+    SuggestedFix removeStatic = SuggestedFixes.removeModifiers(methodTree, state, Modifier.STATIC);
     SuggestedFix testFix =
         SuggestedFix.builder()
-            .merge(removeStatic.orElse(null))
+            .merge(removeStatic)
             .addImport(TEST_CLASS)
             .prefixWith(methodTree, TEST_ANNOTATION)
             .build();
@@ -198,8 +194,8 @@ public class JUnit4TestNotRun extends BugChecker implements MethodTreeMatcher {
 
     SuggestedFix visibilityFix =
         SuggestedFix.builder()
-            .merge(SuggestedFixes.removeModifiers(methodTree, state, Modifier.PUBLIC).orElse(null))
-            .merge(SuggestedFixes.addModifiers(methodTree, state, Modifier.PRIVATE).orElse(null))
+            .merge(SuggestedFixes.removeModifiers(methodTree, state, Modifier.PUBLIC))
+            .merge(SuggestedFixes.addModifiers(methodTree, state, Modifier.PRIVATE))
             .build();
 
     // Suggest @Ignore first if test method is named like a purposely disabled test.

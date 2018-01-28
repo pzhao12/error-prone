@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 The Error Prone Authors.
+ * Copyright 2013 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,15 +74,15 @@ public abstract class ChildMultiMatcher<T extends Tree, N extends Tree>
     public abstract boolean matches();
 
     public static <T extends Tree> MatchResult<T> none() {
-      return create(ImmutableList.<T>of(), /* matches= */ false);
+      return create(ImmutableList.<T>of(), false);
     }
 
     public static <T extends Tree> MatchResult<T> match(T matchingNode) {
-      return create(ImmutableList.of(matchingNode), /* matches= */ true);
+      return create(ImmutableList.of(matchingNode), true);
     }
 
     public static <T extends Tree> MatchResult<T> match(ImmutableList<T> matchingNodes) {
-      return create(matchingNodes, /* matches= */ true);
+      return create(matchingNodes, true);
     }
 
     private static <T extends Tree> MatchResult<T> create(List<T> matchingNode, boolean matches) {

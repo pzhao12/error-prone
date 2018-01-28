@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 The Error Prone Authors.
+ * Copyright 2012 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,7 @@ public class CompilationTestHelper {
           "UTF-8",
           // print stack traces for completion failures
           "-XDdev",
-          "-parameters",
-          "-XDcompilePolicy=simple");
+          "-XDsave-parameter-names");
 
   private final DiagnosticTestHelper diagnosticHelper;
   private final BaseErrorProneCompiler compiler;

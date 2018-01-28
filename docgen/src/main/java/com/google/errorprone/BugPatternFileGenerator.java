@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,12 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.io.LineProcessor;
 import com.google.gson.Gson;
 import java.io.IOError;
@@ -46,7 +48,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -58,6 +59,18 @@ import org.yaml.snakeyaml.Yaml;
  * @author alexeagle@google.com (Alex Eagle)
  */
 class BugPatternFileGenerator implements LineProcessor<List<BugPatternInstance>> {
+
+  private static final Joiner COMMA_JOINER = Joiner.on(", ");
+  private static final Function<String, String> ANNOTATE_AND_CODIFY =
+      new Function<String, String>() {
+        @Override
+        public String apply(String annotationName) {
+          Preconditions.checkState(annotationName.endsWith(".class"));
+          return "`@"
+              + annotationName.substring(0, annotationName.length() - ".class".length())
+              + "`";
+        }
+      };
 
   private final Path outputDir;
   private final Path exampleDirBase;
@@ -207,24 +220,40 @@ class BugPatternFileGenerator implements LineProcessor<List<BugPatternInstance>>
       }
 
       if (pattern.documentSuppression) {
-        String suppressionString;
-        if (pattern.suppressionAnnotations.length == 0) {
-          suppressionString = "This check may not be suppressed.";
-        } else {
-          suppressionString =
-              pattern.suppressionAnnotations.length == 1
-                  ? "Suppress false positives by adding the suppression annotation %s to the "
-                      + "enclosing element."
-                  : "Suppress false positives by adding one of these suppression annotations to "
-                      + "the enclosing element: %s";
-          suppressionString =
-              String.format(
-                  suppressionString,
-                  Arrays.stream(pattern.suppressionAnnotations)
-                      .map((String anno) -> standardizeAnnotation(anno, pattern.name))
-                      .collect(Collectors.joining(", ")));
+        String suppression;
+        switch (pattern.suppressibility) {
+          case SUPPRESS_WARNINGS:
+            suppression =
+                String.format(
+                    "Suppress false positives by adding an `@SuppressWarnings(\"%s\")` "
+                        + "annotation to the enclosing element.",
+                    pattern.name);
+            break;
+          case CUSTOM_ANNOTATION:
+            if (pattern.customSuppressionAnnotations.length == 1) {
+              suppression =
+                  String.format(
+                      "Suppress false positives by adding the custom suppression annotation "
+                          + "`@%s` to the enclosing element.",
+                      pattern.customSuppressionAnnotations[0]);
+            } else {
+              suppression =
+                  String.format(
+                      "Suppress false positives by adding one of these custom suppression "
+                          + "annotations to the enclosing element: %s",
+                      COMMA_JOINER.join(
+                          Lists.transform(
+                              Arrays.asList(pattern.customSuppressionAnnotations),
+                              ANNOTATE_AND_CODIFY)));
+            }
+            break;
+          case UNSUPPRESSIBLE:
+            suppression = "This check may not be suppressed.";
+            break;
+          default:
+            throw new AssertionError(pattern.suppressibility);
         }
-        templateData.put("suppression", suppressionString);
+        templateData.put("suppression", suppression);
       }
 
       MustacheFactory mf = new DefaultMustacheFactory();
@@ -272,17 +301,6 @@ class BugPatternFileGenerator implements LineProcessor<List<BugPatternInstance>>
       }
     }
     return true;
-  }
-
-  private String standardizeAnnotation(String fullAnnotationName, String patternName) {
-    String annotationName =
-        fullAnnotationName.endsWith(".class")
-            ? fullAnnotationName.substring(0, fullAnnotationName.length() - ".class".length())
-            : fullAnnotationName;
-    if (annotationName.equals(SuppressWarnings.class.getName())) {
-      annotationName = SuppressWarnings.class.getSimpleName() + "(\"" + patternName + "\")";
-    }
-    return "`@" + annotationName + "`";
   }
 
   private void writeExample(ExampleInfo example, Writer writer) throws IOException {

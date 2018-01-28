@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 The Error Prone Authors.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,6 @@ import com.sun.tools.javac.code.Symbol.CompletionFailure;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
-import com.sun.tools.javac.comp.Check;
-import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 import com.sun.tools.javac.util.List;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -74,9 +72,7 @@ public class FunctionalInterfaceClash extends BugChecker implements ClassTreeMat
         continue;
       }
       MethodSymbol msym = (MethodSymbol) sym;
-      if (msym.getParameters()
-          .stream()
-          .noneMatch(p -> maybeFunctionalInterface(p.type, types, state))) {
+      if (msym.getParameters().stream().noneMatch(p -> maybeFunctionalInterface(p.type, types))) {
         continue;
       }
       if (msym.isConstructor() && !msym.owner.equals(origin)) {
@@ -91,9 +87,7 @@ public class FunctionalInterfaceClash extends BugChecker implements ClassTreeMat
         continue;
       }
       MethodSymbol msym = getSymbol((MethodTree) member);
-      if (msym.getParameters()
-          .stream()
-          .noneMatch(p -> maybeFunctionalInterface(p.type, types, state))) {
+      if (msym.getParameters().stream().noneMatch(p -> maybeFunctionalInterface(p.type, types))) {
         continue;
       }
       Collection<MethodSymbol> clash =
@@ -117,16 +111,6 @@ public class FunctionalInterfaceClash extends BugChecker implements ClassTreeMat
       }
 
       if (!clash.isEmpty()) {
-
-        // ignore if there are overridden clashing methods in class
-        if (ASTHelpers.findSuperMethod(msym, types).isPresent()
-            && clash
-                .stream()
-                .anyMatch(
-                    methodSymbol -> ASTHelpers.findSuperMethod(methodSymbol, types).isPresent())) {
-          return NO_MATCH;
-        }
-
         String message =
             "When passing lambda arguments to this function, callers will need a cast to"
                 + " disambiguate with: "
@@ -157,7 +141,7 @@ public class FunctionalInterfaceClash extends BugChecker implements ClassTreeMat
 
   private static String functionalInterfaceSignature(VisitorState state, Type type) {
     Types types = state.getTypes();
-    if (!maybeFunctionalInterface(type, types, state)) {
+    if (!maybeFunctionalInterface(type, types)) {
       return Signatures.descriptor(type, types);
     }
     Type descriptorType = types.findDescriptorType(type);
@@ -173,13 +157,10 @@ public class FunctionalInterfaceClash extends BugChecker implements ClassTreeMat
         fiparams.stream().map(t -> Signatures.descriptor(t, types)).collect(joining(",")), result);
   }
 
-  private static boolean maybeFunctionalInterface(Type type, Types types, VisitorState state) {
+  private static boolean maybeFunctionalInterface(Type type, Types types) {
     try {
       return types.isFunctionalInterface(type);
     } catch (CompletionFailure e) {
-      // Report completion errors to avoid e.g. https://github.com/bazelbuild/bazel/issues/4105
-      Check.instance(state.context)
-          .completionError((DiagnosticPosition) state.getPath().getLeaf(), e);
       return false;
     }
   }

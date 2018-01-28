@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Error Prone Authors.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,8 @@ public class MissingDefaultTest {
             "    switch (i) {",
             "      case 42:",
             "        return true;",
-            "      default: // fall out",
+            "default: // fall out",
+            "",
             "    }",
             "    return false;",
             "  }",
@@ -85,8 +86,9 @@ public class MissingDefaultTest {
             "    switch (i) {",
             "      case 42:",
             "        System.err.println(42);",
-            "        break;",
-            "      default: // fall out",
+            "break;",
+            "default: // fall out",
+            "",
             "    }",
             "  }",
             "}")
@@ -179,9 +181,9 @@ public class MissingDefaultTest {
 
   @Test
   public void interiorEmptyNoComment() throws IOException {
-    compilationHelper
-        .addSourceLines(
-            "Test.java",
+    BugCheckerRefactoringTestHelper.newInstance(new MissingDefault(), getClass())
+        .addInputLines(
+            "in/Test.java",
             "class Test {",
             "  boolean f(int i) {",
             "    switch (i) {",
@@ -191,7 +193,18 @@ public class MissingDefaultTest {
             "    }",
             "  }",
             "}")
-        .doTest();
+        .addOutputLines(
+            "out/Test.java",
+            "class Test {",
+            "  boolean f(int i) {",
+            "    switch (i) {",
+            "      default: // fall through",
+            "      case 42:",
+            "        return true;",
+            "    }",
+            "  }",
+            "}")
+        .doTest(TEXT_MATCH);
   }
 
   @Test
@@ -219,7 +232,8 @@ public class MissingDefaultTest {
             "      case 42:",
             "        System.err.println();",
             "        return true;",
-            "      default: // fall out",
+            "default: // fall out",
+            "",
             "    }",
             "    return false;",
             "  }",

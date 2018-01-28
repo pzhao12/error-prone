@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Error Prone Authors.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import com.sun.source.util.JavacTask;
 import com.sun.source.util.Plugin;
 import com.sun.tools.javac.api.BasicJavacTask;
 import com.sun.tools.javac.util.Context;
-import com.sun.tools.javac.util.Options;
 
 /** A javac {@link Plugin} that runs Error Prone. */
 @AutoService(Plugin.class)
@@ -36,7 +35,6 @@ public class ErrorProneJavacPlugin implements Plugin {
   @Override
   public void init(JavacTask javacTask, String... args) {
     Context context = ((BasicJavacTask) javacTask).getContext();
-    BaseErrorProneJavaCompiler.checkCompilePolicy(Options.instance(context).get("compilePolicy"));
     BaseErrorProneJavaCompiler.setupMessageBundle(context);
     RefactoringCollection[] refactoringCollection = {null};
     javacTask.addTaskListener(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The Error Prone Authors.
+ * Copyright 2015 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,12 @@ import com.google.errorprone.CompilationTestHelper;
 import com.google.errorprone.MatcherChecker;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
-import com.google.errorprone.bugpatterns.BugChecker.ClassTreeMatcher;
 import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
 import com.google.errorprone.bugpatterns.BugChecker.MethodTreeMatcher;
 import com.google.errorprone.scanner.ErrorProneScanner;
 import com.google.errorprone.scanner.ScannerSupplier;
-import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.Tree;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -359,48 +356,6 @@ public class MatchersTest {
         .doTest();
   }
 
-  @Test
-  public void packageNameChecker() {
-    CompilationTestHelper.newInstance(PackageNameChecker.class, getClass())
-        .addSourceLines(
-            "test/foo/ClassName.java",
-            "package test.foo;",
-            "// BUG: Diagnostic contains:",
-            "public class ClassName {}")
-        .doTest();
-
-    CompilationTestHelper.newInstance(PackageNameChecker.class, getClass())
-        .addSourceLines(
-            "test/foo/ClassName.java",
-            "package testyfoo;",
-            // No match, the "." is escaped correctly in the regex "test.foo".
-            "public class ClassName {}")
-        .doTest();
-
-    CompilationTestHelper.newInstance(PackageNameChecker.class, getClass())
-        .addSourceLines(
-            "test/foo/bar/ClassName.java",
-            "package test.foo.bar;",
-            "// BUG: Diagnostic contains:",
-            "public class ClassName {}")
-        .doTest();
-
-    CompilationTestHelper.newInstance(PackageNameChecker.class, getClass())
-        .addSourceLines(
-            "test/ClassName.java", // Do not wrap.
-            "package test;",
-            "public class ClassName {}")
-        .doTest();
-
-    CompilationTestHelper.newInstance(PackageNameChecker.class, getClass())
-        .addSourceLines(
-            "test/foobar/ClassName.java",
-            "package test.foobar;",
-            "// BUG: Diagnostic contains:",
-            "public class ClassName {}")
-        .doTest();
-  }
-
   @BugPattern(
     name = "InLoopChecker",
     summary = "Checker that flags the given expression statement if the given matcher matches",
@@ -469,22 +424,6 @@ public class MatchersTest {
         return describeMatch(tree);
       }
       return Description.NO_MATCH;
-    }
-  }
-
-  /** Checker that checks if a class is in a particular package. */
-  @BugPattern(
-    name = "PackageNameChecker",
-    summary = "Checks the name of the package",
-    category = ONE_OFF,
-    severity = ERROR
-  )
-  public static class PackageNameChecker extends BugChecker implements ClassTreeMatcher {
-    private static final Matcher<Tree> MATCHER = Matchers.packageStartsWith("test.foo");
-
-    @Override
-    public Description matchClass(ClassTree tree, VisitorState state) {
-      return MATCHER.matches(tree, state) ? describeMatch(tree) : Description.NO_MATCH;
     }
   }
 }

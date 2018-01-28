@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import static com.google.errorprone.util.Signatures.prettyType;
 
 import com.google.common.base.Optional;
 import com.google.errorprone.BugPattern;
-import com.google.errorprone.BugPattern.ProvidesFix;
 import com.google.errorprone.BugPattern.StandardTags;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker.CompoundAssignmentTreeMatcher;
@@ -44,8 +43,7 @@ import com.sun.tools.javac.tree.JCTree.JCBinary;
   summary = "Compound assignments may hide dangerous casts",
   category = JDK,
   severity = WARNING,
-  tags = StandardTags.FRAGILE_CODE,
-  providesFix = ProvidesFix.REQUIRES_HUMAN_ATTENTION
+  tags = StandardTags.FRAGILE_CODE
 )
 public class NarrowingCompoundAssignment extends BugChecker
     implements CompoundAssignmentTreeMatcher {

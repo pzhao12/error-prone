@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,6 @@ public class DescendantOfTransitiveTest extends DescendantOfAbstractTest {
     clearSourceFiles();
     writeFileToLocalDisk(
         "C.java", "public class C {", "  public void test(b.B b) {", "    b.count();", "  }", "}");
-    assertCompilesWithLocalDisk(
-        memberSelectMatches(/* shouldMatch= */ true, new DescendantOf("i.I1", "count()")));
+    assertCompilesWithLocalDisk(memberSelectMatches(true, new DescendantOf("i.I1", "count()")));
   }
 }

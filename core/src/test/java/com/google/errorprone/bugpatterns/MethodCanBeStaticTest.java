@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 The Error Prone Authors.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,8 +265,6 @@ public class MethodCanBeStaticTest {
             "  private void writeObject(",
             "    ObjectOutputStream stream) throws IOException {}",
             "  private void readObjectNoData() throws ObjectStreamException {}",
-            "  private Object readResolve() { return null; }",
-            "  private Object writeReplace() { return null; }",
             "}")
         .doTest();
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The Error Prone Authors.
+ * Copyright 2015 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package com.google.errorprone.scanner;
-
-import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -50,7 +48,7 @@ public abstract class ErrorProneScannerTransformer implements CodeTransformer {
 
   /** Create a VisitorState object from a compilation unit. */
   private VisitorState createVisitorState(Context context, DescriptionListener listener) {
-    ErrorProneOptions options = requireNonNull(context.get(ErrorProneOptions.class));
-    return new VisitorState(context, listener, scanner().severityMap(), options);
+    return new VisitorState(
+        context, listener, scanner().severityMap(), context.get(ErrorProneOptions.class));
   }
 }

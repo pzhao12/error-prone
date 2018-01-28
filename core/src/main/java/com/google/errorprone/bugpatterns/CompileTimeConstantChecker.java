@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 The Error Prone Authors.
+ * Copyright 2012 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static com.google.errorprone.BugPattern.SeverityLevel.ERROR;
 import static com.google.errorprone.matchers.CompileTimeConstantExpressionMatcher.hasCompileTimeConstantAnnotation;
 
 import com.google.errorprone.BugPattern;
+import com.google.errorprone.BugPattern.Suppressibility;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
 import com.google.errorprone.bugpatterns.BugChecker.NewClassTreeMatcher;
@@ -70,8 +71,7 @@ import java.util.Iterator;
   linkType = NONE,
   category = GUAVA,
   severity = ERROR,
-  disableable = false,
-  suppressionAnnotations = {}
+  suppressibility = Suppressibility.UNSUPPRESSIBLE
 )
 public class CompileTimeConstantChecker extends BugChecker
     implements MethodInvocationTreeMatcher, NewClassTreeMatcher {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,8 @@ public abstract class ScannerSupplier implements Supplier<Scanner> {
       getAllChecks()
           .values()
           .stream()
-          .filter(c -> c.defaultSeverity() == SeverityLevel.ERROR && c.disableable())
+          .filter(
+              c -> c.defaultSeverity() == SeverityLevel.ERROR && c.suppressibility().disableable())
           .forEach(c -> severities.put(c.canonicalName(), SeverityLevel.WARNING));
     }
 
@@ -166,7 +167,7 @@ public abstract class ScannerSupplier implements Supplier<Scanner> {
       getAllChecks()
           .values()
           .stream()
-          .filter(c -> c.disableable())
+          .filter(c -> c.suppressibility().disableable())
           .forEach(c -> disabled.add(c.canonicalName()));
     }
 
@@ -183,7 +184,7 @@ public abstract class ScannerSupplier implements Supplier<Scanner> {
 
           switch (newSeverity) {
             case OFF:
-              if (!check.disableable()) {
+              if (!check.suppressibility().disableable()) {
                 throw new InvalidCommandLineOptionException(
                     check.canonicalName() + " may not be disabled");
               }
@@ -197,7 +198,7 @@ public abstract class ScannerSupplier implements Supplier<Scanner> {
             case WARN:
               // Demoting an enabled check from an error to a warning is a form of disabling
               if (!disabled().contains(check.canonicalName())
-                  && !check.disableable()
+                  && !check.suppressibility().disableable()
                   && check.defaultSeverity() == SeverityLevel.ERROR) {
                 throw new InvalidCommandLineOptionException(
                     check.canonicalName()

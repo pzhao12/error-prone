@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,7 @@ public class MethodReturnsNonNullStringTest extends CompilerBasedAbstractTest {
         "    testStr.charAt(0);",
         "  }",
         "}");
-    assertCompiles(
-        methodInvocationMatches(/* shouldMatch= */ true, Matchers.methodReturnsNonNull()));
+    assertCompiles(methodInvocationMatches(true, Matchers.methodReturnsNonNull()));
   }
 
   @Test
@@ -53,8 +52,7 @@ public class MethodReturnsNonNullStringTest extends CompilerBasedAbstractTest {
         "    String.valueOf(123);",
         "  }",
         "}");
-    assertCompiles(
-        methodInvocationMatches(/* shouldMatch= */ true, Matchers.methodReturnsNonNull()));
+    assertCompiles(methodInvocationMatches(true, Matchers.methodReturnsNonNull()));
   }
 
   @Test
@@ -67,8 +65,7 @@ public class MethodReturnsNonNullStringTest extends CompilerBasedAbstractTest {
         "    return str;",
         "  }",
         "}");
-    assertCompiles(
-        methodInvocationMatches(/* shouldMatch= */ false, Matchers.methodReturnsNonNull()));
+    assertCompiles(methodInvocationMatches(false, Matchers.methodReturnsNonNull()));
   }
 
   @Test
@@ -83,8 +80,7 @@ public class MethodReturnsNonNullStringTest extends CompilerBasedAbstractTest {
         "    getString();",
         "  }",
         "}");
-    assertCompiles(
-        methodInvocationMatches(/* shouldMatch= */ false, Matchers.methodReturnsNonNull()));
+    assertCompiles(methodInvocationMatches(false, Matchers.methodReturnsNonNull()));
   }
 
   private Scanner methodInvocationMatches(

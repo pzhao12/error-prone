@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,8 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Processes command-line options specific to error-prone.
@@ -58,7 +56,6 @@ public class ErrorProneOptions {
   private static final String DISABLE_WARNINGS_IN_GENERATED_CODE_FLAG =
       "-XepDisableWarningsInGeneratedCode";
   private static final String COMPILING_TEST_ONLY_CODE = "-XepCompilingTestOnlyCode";
-  private static final String EXCLUDED_PATHS_PREFIX = "-XepExcludedPaths:";
 
   /** see {@link javax.tools.OptionChecker#isSupportedOption(String)} */
   public static int isSupportedOption(String option) {
@@ -67,7 +64,6 @@ public class ErrorProneOptions {
             || option.startsWith(ErrorProneFlags.PREFIX)
             || option.startsWith(PATCH_OUTPUT_LOCATION)
             || option.startsWith(PATCH_CHECKS_PREFIX)
-            || option.startsWith(EXCLUDED_PATHS_PREFIX)
             || option.equals(IGNORE_UNKNOWN_CHECKS_FLAG)
             || option.equals(DISABLE_WARNINGS_IN_GENERATED_CODE_FLAG)
             || option.equals(ERRORS_AS_WARNINGS_FLAG)
@@ -160,7 +156,6 @@ public class ErrorProneOptions {
   private final boolean isTestOnlyTarget;
   private final ErrorProneFlags flags;
   private final PatchingOptions patchingOptions;
-  private final Pattern excludedPattern;
 
   private ErrorProneOptions(
       ImmutableMap<String, Severity> severityMap,
@@ -172,8 +167,7 @@ public class ErrorProneOptions {
       boolean disableAllChecks,
       boolean isTestOnlyTarget,
       ErrorProneFlags flags,
-      PatchingOptions patchingOptions,
-      Pattern excludedPattern) {
+      PatchingOptions patchingOptions) {
     this.severityMap = severityMap;
     this.remainingArgs = remainingArgs;
     this.ignoreUnknownChecks = ignoreUnknownChecks;
@@ -184,7 +178,6 @@ public class ErrorProneOptions {
     this.isTestOnlyTarget = isTestOnlyTarget;
     this.flags = flags;
     this.patchingOptions = patchingOptions;
-    this.excludedPattern = excludedPattern;
   }
 
   public String[] getRemainingArgs() {
@@ -219,10 +212,6 @@ public class ErrorProneOptions {
     return patchingOptions;
   }
 
-  public Pattern getExcludedPattern() {
-    return excludedPattern;
-  }
-
   private static class Builder {
     private boolean ignoreUnknownChecks = false;
     private boolean disableWarningsInGeneratedCode = false;
@@ -233,23 +222,22 @@ public class ErrorProneOptions {
     private Map<String, Severity> severityMap = new HashMap<>();
     private final ErrorProneFlags.Builder flagsBuilder = ErrorProneFlags.builder();
     private final PatchingOptions.Builder patchingOptionsBuilder = PatchingOptions.builder();
-    private Pattern excludedPattern;
 
     private void parseSeverity(String arg) {
       // Strip prefix
       String remaining = arg.substring(SEVERITY_PREFIX.length());
       // Split on ':'
-      List<String> parts = Splitter.on(':').splitToList(remaining);
-      if (parts.size() > 2 || parts.get(0).isEmpty()) {
+      String[] parts = remaining.split(":");
+      if (parts.length > 2 || parts[0].isEmpty()) {
         throw new InvalidCommandLineOptionException("invalid flag: " + arg);
       }
-      String checkName = parts.get(0);
+      String checkName = parts[0];
       Severity severity;
-      if (parts.size() == 1) {
+      if (parts.length == 1) {
         severity = Severity.DEFAULT;
       } else { // parts.length == 2
         try {
-          severity = Severity.valueOf(parts.get(1));
+          severity = Severity.valueOf(parts[1]);
         } catch (IllegalArgumentException e) {
           throw new InvalidCommandLineOptionException("invalid flag: " + arg);
         }
@@ -313,12 +301,7 @@ public class ErrorProneOptions {
           disableAllChecks,
           isTestOnlyTarget,
           flagsBuilder.build(),
-          patchingOptionsBuilder.build(),
-          excludedPattern);
-    }
-
-    public void setExcludedPattern(Pattern excludedPattern) {
-      this.excludedPattern = excludedPattern;
+          patchingOptionsBuilder.build());
     }
   }
 
@@ -408,9 +391,6 @@ public class ErrorProneOptions {
             String remaining = arg.substring(PATCH_IMPORT_ORDER_PREFIX.length());
             ImportOrganizer importOrganizer = ImportOrderParser.getImportOrganizer(remaining);
             builder.patchingOptionsBuilder().importOrganizer(importOrganizer);
-          } else if (arg.startsWith(EXCLUDED_PATHS_PREFIX)) {
-            String pathRegex = arg.substring(EXCLUDED_PATHS_PREFIX.length());
-            builder.setExcludedPattern(Pattern.compile(pathRegex));
           } else {
             remainingArgs.add(arg);
           }

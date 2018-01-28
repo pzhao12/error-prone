@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Error Prone Authors.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,20 +180,6 @@ public final class UngroupedOverloadsTest {
             "  void foo(int x) {}",
             "  void baz() {}",
             "}")
-        .doTest();
-  }
-
-  @Test
-  public void staticAndNonStatic() throws Exception {
-    refactoringHelper
-        .addInputLines(
-            "Test.java",
-            "class Test {",
-            "  void foo() {}",
-            "  void bar() {}",
-            "  static void foo(int x) {}",
-            "}")
-        .expectUnchanged()
         .doTest();
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 The Error Prone Authors.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,19 +89,6 @@ public class FunctionalInterfaceMethodChangedPositiveCases {
     default String superSam() {
       System.out.println("do something else");
       return subSam();
-    }
-  }
-
-  @FunctionalInterface
-  public interface ValueReturningSubFI2 extends ValueReturningSuperFI {
-
-    String subSam();
-
-    @Override
-    // BUG: Diagnostic contains:
-    default String superSam() {
-      subSam();
-      return null;
     }
   }
 }

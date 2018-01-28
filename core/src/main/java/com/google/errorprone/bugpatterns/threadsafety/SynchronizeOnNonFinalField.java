@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,6 @@ import com.sun.source.tree.SynchronizedTree;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
-import java.util.stream.Stream;
-import javax.lang.model.element.Name;
 
 /** @author cushon@google.com (Liam Miller-Cushon) */
 @BugPattern(
@@ -62,13 +60,6 @@ public class SynchronizeOnNonFinalField extends BugChecker
       return NO_MATCH;
     }
     if (ASTHelpers.hasAnnotation(varSymbol, LazyInit.class, state)) {
-      return NO_MATCH;
-    }
-
-    Name ownerName = varSymbol.owner.enclClass().getQualifiedName();
-    if (Stream.of("java.io.Writer", "java.io.Reader").anyMatch(ownerName::contentEquals)) {
-      // These classes contain a non-final 'lock' variable available to subclasses, and we can't
-      // make these locks final.
       return NO_MATCH;
     }
 

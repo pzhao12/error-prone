@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The Error Prone Authors.
+ * Copyright 2015 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,20 +17,22 @@ package com.google.errorprone;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.BugPattern.SeverityLevel;
+import com.google.errorprone.BugPattern.Suppressibility;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.matchers.Description;
 import com.sun.source.tree.Tree;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 import javax.annotation.CheckReturnValue;
 
 /**
@@ -74,17 +76,18 @@ public class BugCheckerInfo implements Serializable {
    */
   private final String linkUrl;
 
-  private final boolean supportsSuppressWarnings;
+  /**
+   * Whether this check may be suppressed. Corresponds to the {@code suppressibility} attribute from
+   * its {@code BugPattern}.
+   */
+  private final Suppressibility suppressibility;
 
   /**
-   * A set of suppression annotations for this check. Computed from the {@code
-   * suppressionAnnotations} attributes from its {@code BugPattern}. May be empty if there are no
-   * suppression annotations for this check.
+   * A set of custom suppression annotations for this check. Computed from the {@code
+   * suppressibility} and {@code customSuppressionAnnotations} attributes from its {@code
+   * BugPattern}. May be empty if there are no custom suppression annotations for this check.
    */
   private final Set<Class<? extends Annotation>> customSuppressionAnnotations;
-
-  /** True if the check can be disabled using command-line flags. */
-  private final boolean disableable;
 
   public static BugCheckerInfo create(Class<? extends BugChecker> checker) {
     BugPattern pattern =
@@ -112,16 +115,11 @@ public class BugCheckerInfo implements Serializable {
         pattern.summary(),
         pattern.severity(),
         createLinkUrl(pattern),
-        Stream.of(pattern.suppressionAnnotations()).anyMatch(a -> isSuppressWarnings(a)),
-        Stream.of(pattern.suppressionAnnotations())
-            .filter(a -> !isSuppressWarnings(a))
-            .collect(toImmutableSet()),
-        ImmutableSet.copyOf(pattern.tags()),
-        pattern.disableable());
-  }
-
-  private static boolean isSuppressWarnings(Class<? extends Annotation> annotation) {
-    return annotation.getSimpleName().equals("SuppressWarnings");
+        pattern.suppressibility(),
+        pattern.suppressibility() == Suppressibility.CUSTOM_ANNOTATION
+            ? new HashSet<>(Arrays.asList(pattern.customSuppressionAnnotations()))
+            : Collections.emptySet(),
+        ImmutableSet.copyOf(pattern.tags()));
   }
 
   private BugCheckerInfo(
@@ -131,20 +129,18 @@ public class BugCheckerInfo implements Serializable {
       String message,
       SeverityLevel defaultSeverity,
       String linkUrl,
-      boolean supportsSuppressWarnings,
+      Suppressibility suppressibility,
       Set<Class<? extends Annotation>> customSuppressionAnnotations,
-      ImmutableSet<String> tags,
-      boolean disableable) {
+      ImmutableSet<String> tags) {
     this.checker = checker;
     this.canonicalName = canonicalName;
     this.allNames = allNames;
     this.message = message;
     this.defaultSeverity = defaultSeverity;
     this.linkUrl = linkUrl;
-    this.supportsSuppressWarnings = supportsSuppressWarnings;
+    this.suppressibility = suppressibility;
     this.customSuppressionAnnotations = customSuppressionAnnotations;
     this.tags = tags;
-    this.disableable = disableable;
   }
 
   /**
@@ -163,10 +159,9 @@ public class BugCheckerInfo implements Serializable {
         message,
         defaultSeverity,
         linkUrl,
-        supportsSuppressWarnings,
+        suppressibility,
         customSuppressionAnnotations,
-        tags,
-        disableable);
+        tags);
   }
 
   private static final String URL_FORMAT = "http://errorprone.info/bugpattern/%s";
@@ -231,16 +226,12 @@ public class BugCheckerInfo implements Serializable {
     return linkUrl;
   }
 
-  public boolean supportsSuppressWarnings() {
-    return supportsSuppressWarnings;
+  public Suppressibility suppressibility() {
+    return suppressibility;
   }
 
   public Set<Class<? extends Annotation>> customSuppressionAnnotations() {
     return customSuppressionAnnotations;
-  }
-
-  public boolean disableable() {
-    return disableable;
   }
 
   public ImmutableSet<String> getTags() {

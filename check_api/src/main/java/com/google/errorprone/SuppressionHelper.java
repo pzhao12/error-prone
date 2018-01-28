@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.google.errorprone;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.BugPattern.SeverityLevel;
+import com.google.errorprone.BugPattern.Suppressibility;
 import com.google.errorprone.matchers.Suppressible;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Pair;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -37,9 +38,6 @@ import java.util.Set;
  * AST. 2) A set of all custom suppression annotations down this path of the AST.
  */
 public class SuppressionHelper {
-
-  private static final ImmutableSet<String> GENERATED_ANNOTATIONS =
-      ImmutableSet.of("javax.annotation.Generated", "javax.annotation.processing.Generated");
 
   /** The set of custom suppression annotations that this SuppressionHelper should look for. */
   private final Set<Class<? extends Annotation>> customSuppressionAnnotations;
@@ -101,7 +99,8 @@ public class SuppressionHelper {
       boolean inGeneratedCode,
       VisitorState state) {
 
-    boolean newInGeneratedCode = inGeneratedCode || isGenerated(sym, state);
+    boolean newInGeneratedCode =
+        inGeneratedCode || ASTHelpers.hasAnnotation(sym, "javax.annotation.Generated", state);
 
     /** Handle custom suppression annotations. */
     Set<Class<? extends Annotation>> newCustomSuppressions = null;
@@ -120,7 +119,8 @@ public class SuppressionHelper {
     for (Attribute.Compound attr : sym.getAnnotationMirrors()) {
       if ((attr.type.tsym == suppressWarningsType.tsym)
           || attr.type.tsym.getQualifiedName().contentEquals("android.annotation.SuppressLint")) {
-        for (Pair<MethodSymbol, Attribute> value : attr.values) {
+        for (List<Pair<MethodSymbol, Attribute>> v = attr.values; v.nonEmpty(); v = v.tail) {
+          Pair<MethodSymbol, Attribute> value = v.head;
           if (value.fst.name.contentEquals("value"))
             if (value.snd
                 instanceof Attribute.Array) { // SuppressWarnings/SuppressLint take an array
@@ -161,23 +161,20 @@ public class SuppressionHelper {
       SeverityLevel severityLevel,
       boolean inGeneratedCode,
       boolean disableWarningsInGeneratedCode) {
+    if (suppressible.suppressibility() == Suppressibility.UNSUPPRESSIBLE) {
+      return false;
+    }
     if (inGeneratedCode && disableWarningsInGeneratedCode && severityLevel != SeverityLevel.ERROR) {
       return true;
     }
-    if (suppressible.supportsSuppressWarnings()
-        && !Collections.disjoint(suppressible.allNames(), suppressionsOnCurrentPath)) {
-      return true;
+    switch (suppressible.suppressibility()) {
+      case CUSTOM_ANNOTATION:
+        return !Collections.disjoint(
+            suppressible.customSuppressionAnnotations(), customSuppressionsOnCurrentPath);
+      case SUPPRESS_WARNINGS:
+        return !Collections.disjoint(suppressible.allNames(), suppressionsOnCurrentPath);
+      default:
+        throw new IllegalStateException("No case for: " + suppressible.suppressibility());
     }
-    return !Collections.disjoint(
-        suppressible.customSuppressionAnnotations(), customSuppressionsOnCurrentPath);
-  }
-
-  private static boolean isGenerated(Symbol sym, VisitorState state) {
-    for (String annotation : GENERATED_ANNOTATIONS) {
-      if (ASTHelpers.hasAnnotation(sym, annotation, state)) {
-        return true;
-      }
-    }
-    return false;
   }
 }

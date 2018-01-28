@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Error Prone Authors.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,11 +166,10 @@ public class Comments {
     return argumentTracker.build();
   }
 
-  private static ImmutableList<Commented<ExpressionTree>> noComments(
-      List<? extends ExpressionTree> arguments) {
+  private static ImmutableList noComments(List<? extends ExpressionTree> arguments) {
     return arguments
         .stream()
-        .map(a -> Commented.<ExpressionTree>builder().setTree(a).build())
+        .map(a -> Commented.builder().setTree(a).build())
         .collect(toImmutableList());
   }
 
@@ -262,7 +261,7 @@ public class Comments {
    * @param target is the element to search for
    * @param iterable is the iterable to search
    * @param defaultValue will be returned if there is no item following the searched for item
-   * @return the item following {@code target} or {@code defaultValue} if not found
+   * @return the item following {@code target} or {@code defaultvalue} if not found
    */
   private static <T> T after(T target, Iterable<? extends T> iterable, T defaultValue) {
     Iterator<? extends T> iterator = iterable.iterator();
@@ -363,7 +362,7 @@ public class Comments {
         resultBuilder.add(previousCommentedResultBuilder.build());
       }
       previousCommentedResultBuilder = currentCommentedResultBuilder;
-      currentCommentedResultBuilder = Commented.<ExpressionTree>builder().setTree(nextArgument);
+      currentCommentedResultBuilder = Commented.builder().setTree(nextArgument);
     }
 
     /** Returns the final result. The object should not be used after calling this method */
@@ -396,7 +395,7 @@ public class Comments {
       currentCommentedResultBuilder.addAllComment(comments, currentArgumentStartPosition, offset);
     }
 
-    boolean hasMoreArguments() {
+    public boolean hasMoreArguments() {
       return argumentsIterator.hasNext();
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Error Prone Authors.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -362,76 +362,6 @@ public class ExpectedExceptionCheckerTest {
             "  public void test() throws Exception {",
             "    assertThat(false).isFalse();",
             "    assertThrows(RuntimeException.class, () -> assertThat(true).isTrue());",
-            "  }",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void removeExplicitFail() throws IOException {
-    BugCheckerRefactoringTestHelper.newInstance(new ExpectedExceptionChecker(), getClass())
-        .addInputLines(
-            "in/ExceptionTest.java",
-            "import static com.google.common.truth.Truth.assertThat;",
-            "import static org.junit.Assert.fail;",
-            "import java.io.IOException;",
-            "import java.nio.file.*;",
-            "import org.junit.Test;",
-            "import org.junit.Rule;",
-            "import org.junit.rules.ExpectedException;",
-            "class ExceptionTest {",
-            "  @Rule ExpectedException thrown = ExpectedException.none();",
-            "  @Test",
-            "  public void testThrow() throws Exception {",
-            "    thrown.expect(IOException.class);",
-            "    throw new IOException();",
-            "  }",
-            "  @Test",
-            "  public void one() throws Exception {",
-            "    Path p = Paths.get(\"NOSUCH\");",
-            "    thrown.expect(IOException.class);",
-            "    Files.readAllBytes(p);",
-            "    assertThat(Files.exists(p)).isFalse();",
-            "    fail();",
-            "  }",
-            "  @Test",
-            "  public void two() throws Exception {",
-            "    Path p = Paths.get(\"NOSUCH\");",
-            "    thrown.expect(IOException.class);",
-            "    Files.readAllBytes(p);",
-            "    assertThat(Files.exists(p)).isFalse();",
-            "    throw new AssertionError();",
-            "  }",
-            "}")
-        .addOutputLines(
-            "out/ExceptionTest.java",
-            "import static com.google.common.truth.Truth.assertThat;",
-            "import static org.junit.Assert.assertThrows;",
-            "import static org.junit.Assert.fail;",
-            "",
-            "import java.io.IOException;",
-            "import java.nio.file.*;",
-            "import org.junit.Rule;",
-            "import org.junit.Test;",
-            "import org.junit.rules.ExpectedException;",
-            "class ExceptionTest {",
-            "  @Rule ExpectedException thrown = ExpectedException.none();",
-            "  @Test",
-            "  public void testThrow() throws Exception {",
-            "    thrown.expect(IOException.class);",
-            "    throw new IOException();",
-            "  }",
-            "  @Test",
-            "  public void one() throws Exception {",
-            "    Path p = Paths.get(\"NOSUCH\");",
-            "    assertThrows(IOException.class, () -> Files.readAllBytes(p));",
-            "    assertThat(Files.exists(p)).isFalse();",
-            "  }",
-            "  @Test",
-            "  public void two() throws Exception {",
-            "    Path p = Paths.get(\"NOSUCH\");",
-            "    assertThrows(IOException.class, () -> Files.readAllBytes(p));",
-            "    assertThat(Files.exists(p)).isFalse();",
             "  }",
             "}")
         .doTest();

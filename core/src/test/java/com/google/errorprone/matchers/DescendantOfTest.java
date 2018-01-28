@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 The Error Prone Authors.
+ * Copyright 2012 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ public class DescendantOfTest extends DescendantOfAbstractTest {
         "    return a.count();",
         "  }",
         "}");
-    assertCompiles(
-        memberSelectMatches(/* shouldMatch= */ true, new DescendantOf("com.google.A", "count()")));
+    assertCompiles(memberSelectMatches(true, new DescendantOf("com.google.A", "count()")));
   }
 
   @Test
@@ -50,8 +49,7 @@ public class DescendantOfTest extends DescendantOfAbstractTest {
         "    return b.count();",
         "  }",
         "}");
-    assertCompiles(
-        memberSelectMatches(/* shouldMatch= */ true, new DescendantOf("com.google.A", "count()")));
+    assertCompiles(memberSelectMatches(true, new DescendantOf("com.google.A", "count()")));
   }
 
   @Test
@@ -67,8 +65,7 @@ public class DescendantOfTest extends DescendantOfAbstractTest {
         "    return count();",
         "  }",
         "}");
-    assertCompiles(
-        memberSelectMatches(/* shouldMatch= */ true, new DescendantOf("com.google.A", "count()")));
+    assertCompiles(memberSelectMatches(true, new DescendantOf("com.google.A", "count()")));
   }
 
   @Test
@@ -83,8 +80,7 @@ public class DescendantOfTest extends DescendantOfAbstractTest {
         "  }",
         "}");
     assertCompiles(
-        memberSelectMatches(
-            /* shouldMatch= */ false, new DescendantOf("com.google.A", "count(java.lang.Object)")));
+        memberSelectMatches(false, new DescendantOf("com.google.A", "count(java.lang.Object)")));
   }
 
   @Test
@@ -97,7 +93,6 @@ public class DescendantOfTest extends DescendantOfAbstractTest {
         "    return A.staticCount();",
         "  }",
         "}");
-    assertCompiles(
-        memberSelectMatches(/* shouldMatch= */ false, new DescendantOf("com.google.A", "count()")));
+    assertCompiles(memberSelectMatches(false, new DescendantOf("com.google.A", "count()")));
   }
 }

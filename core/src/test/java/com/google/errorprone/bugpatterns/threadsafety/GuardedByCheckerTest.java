@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,20 +245,6 @@ public class GuardedByCheckerTest {
             "threadsafety/Test.java",
             "package threadsafety;",
             "import javax.annotation.concurrent.GuardedBy;",
-            "class Test {",
-            "  // BUG: Diagnostic contains: Invalid @GuardedBy expression",
-            "  @GuardedBy(\"foo\") int y;",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void testErrorProneAnnotation() throws Exception {
-    compilationHelper
-        .addSourceLines(
-            "threadsafety/Test.java",
-            "package threadsafety;",
-            "import com.google.errorprone.annotations.concurrent.GuardedBy;",
             "class Test {",
             "  // BUG: Diagnostic contains: Invalid @GuardedBy expression",
             "  @GuardedBy(\"foo\") int y;",

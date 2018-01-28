@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The Error Prone Authors.
+ * Copyright 2015 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 /** A collection of types with with known mutability. */
-public final class WellKnownMutability implements ThreadSafety.KnownTypes {
+public final class WellKnownMutability {
 
 
   private WellKnownMutability(List<String> knownImmutable, List<String> knownUnsafe) {
@@ -56,12 +56,6 @@ public final class WellKnownMutability implements ThreadSafety.KnownTypes {
     return knownImmutableClasses;
   }
 
-  @Override
-  public Map<String, AnnotationInfo> getKnownSafeClasses() {
-    return getKnownImmutableClasses();
-  }
-
-  @Override
   public Set<String> getKnownUnsafeClasses() {
     return knownUnsafeClasses;
   }
@@ -160,11 +154,9 @@ public final class WellKnownMutability implements ThreadSafety.KnownTypes {
         .add(com.google.common.graph.ImmutableGraph.class, "N")
         .add(com.google.common.graph.ImmutableNetwork.class, "N", "E")
         .add(com.google.common.graph.ImmutableValueGraph.class, "N", "V")
-        .add("com.google.common.hash.AbstractHashFunction") // package-private
         .add(com.google.common.hash.HashCode.class)
         .add(com.google.common.io.BaseEncoding.class)
         .add(com.google.common.net.MediaType.class)
-        .add(com.google.common.primitives.UnsignedInteger.class)
         .add(com.google.common.primitives.UnsignedLong.class)
         .add(java.lang.Class.class)
         .add(java.lang.String.class)
@@ -270,16 +262,12 @@ public final class WellKnownMutability implements ThreadSafety.KnownTypes {
         .add("org.threeten.bp.zone.ZoneRulesProvider")
         .add("org.joda.time.DateTime")
         .add("org.joda.time.DateTimeZone")
-        .add("org.joda.time.Days")
         .add("org.joda.time.Duration")
         .add("org.joda.time.Instant")
         .add("org.joda.time.LocalDate")
         .add("org.joda.time.LocalDateTime")
         .add("org.joda.time.Period")
         .add("org.joda.time.format.DateTimeFormatter")
-        .add("org.openqa.selenium.Dimension")
-        .add("org.openqa.selenium.DeviceRotation")
-        .add("org.openqa.selenium.ImmutableCapabilities")
         .build();
   }
 

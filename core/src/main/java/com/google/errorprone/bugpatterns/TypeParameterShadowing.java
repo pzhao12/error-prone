@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Error Prone Authors.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,22 +120,15 @@ public class TypeParameterShadowing extends BugChecker
         .map(
             v ->
                 renameTypeVariable(
-                    typeParameterInList(typeParameters, v),
                     tree,
+                    typeParameters,
+                    v.name,
                     replacementTypeVarName(v.name, typeVarsInScope),
                     state))
         .forEach(fixBuilder::merge);
 
     descriptionBuilder.addFix(fixBuilder.build());
     return descriptionBuilder.build();
-  }
-
-  private TypeParameterTree typeParameterInList(
-      List<? extends TypeParameterTree> typeParameters, TypeVariableSymbol v) {
-    return typeParameters
-        .stream()
-        .filter(t -> t.getName().contentEquals(v.name))
-        .collect(MoreCollectors.onlyElement());
   }
 
   private static final Pattern TRAILING_DIGIT_EXTRACTOR = Pattern.compile("^(.*?)(\\d+)$");
@@ -160,21 +153,27 @@ public class TypeParameterShadowing extends BugChecker
     return replacementName;
   }
 
-  static SuggestedFix renameTypeVariable(
-      TypeParameterTree typeParameter,
-      Tree owningTree,
+  private static SuggestedFix renameTypeVariable(
+      Tree sourceTree,
+      List<? extends TypeParameterTree> typeParameters,
+      Name typeVariable,
       String typeVarReplacement,
       VisitorState state) {
 
-    Symbol typeVariableSymbol = ASTHelpers.getSymbol(typeParameter);
+    TypeParameterTree matchingTypeParam =
+        typeParameters
+            .stream()
+            .filter(t -> t.getName().contentEquals(typeVariable))
+            .collect(MoreCollectors.onlyElement());
+    Symbol typeVariableSymbol = ASTHelpers.getSymbol(matchingTypeParam);
 
     // replace only the type parameter name (and not any upper bounds)
-    String name = typeParameter.getName().toString();
-    int pos = ((JCTree) typeParameter).getStartPosition();
+    String name = matchingTypeParam.getName().toString();
+    int pos = ((JCTree) matchingTypeParam).getStartPosition();
     SuggestedFix.Builder fixBuilder =
         SuggestedFix.builder().replace(pos, pos + name.length(), typeVarReplacement);
 
-    ((JCTree) owningTree)
+    ((JCTree) sourceTree)
         .accept(
             new TreeScanner() {
               @Override

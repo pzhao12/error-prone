@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 The Error Prone Authors.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,6 @@ public class IdentityBinaryExpression extends BugChecker implements BinaryTreeMa
       return Optional.empty();
     }
     return Optional.of(
-        String.format("%s.isNaN(%s)", name, state.getSourceForNode(tree.getLeftOperand())));
+        String.format("%s.isNan(%s)", name, state.getSourceForNode(tree.getLeftOperand())));
   }
 }

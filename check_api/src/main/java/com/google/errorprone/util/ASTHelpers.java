@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 The Error Prone Authors.
+ * Copyright 2012 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,11 @@
 
 package com.google.errorprone.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.errorprone.matchers.JUnitMatchers.JUNIT4_RUN_WITH_ANNOTATION;
 import static com.sun.tools.javac.code.Scope.LookupKind.NON_RECURSIVE;
 
-import com.google.auto.value.AutoValue;
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.dataflow.nullnesspropagation.Nullness;
 import com.google.errorprone.dataflow.nullnesspropagation.NullnessAnalysis;
@@ -32,13 +28,10 @@ import com.google.errorprone.matchers.JUnitMatchers;
 import com.google.errorprone.matchers.Matcher;
 import com.google.errorprone.suppliers.Suppliers;
 import com.sun.source.tree.AnnotationTree;
-import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
@@ -48,15 +41,11 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.PackageTree;
 import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.ParenthesizedTree;
-import com.sun.source.tree.ReturnTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeParameterTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
-import com.sun.source.util.TreeScanner;
-import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Scope;
 import com.sun.tools.javac.code.Symbol;
@@ -107,10 +96,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.TypeKind;
-import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 
 /** This class contains utility methods to work with the javac AST. */
 public class ASTHelpers {
@@ -155,8 +142,8 @@ public class ASTHelpers {
   }
 
   /**
-   * Gets the symbol declared by a tree. Returns null if {@code tree} does not declare a symbol or
-   * is null.
+   * Gets the symbol declared by a tree. Returns null if this tree does not declare a symbol, if
+   * {@code tree} is null.
    */
   public static Symbol getDeclaredSymbol(Tree tree) {
     if (tree instanceof AnnotationTree) {
@@ -349,8 +336,6 @@ public class ASTHelpers {
       return methodCall.type.getReturnType();
     } else if (expressionTree instanceof JCMethodInvocation) {
       return getReturnType(((JCMethodInvocation) expressionTree).getMethodSelect());
-    } else if (expressionTree instanceof JCMemberReference) {
-      return ((JCMemberReference) expressionTree).sym.type.getReturnType();
     }
     throw new IllegalArgumentException("Expected a JCFieldAccess or JCIdent");
   }
@@ -477,8 +462,7 @@ public class ASTHelpers {
           && !sym.isStatic()
           && ((sym.flags() & Flags.SYNTHETIC) == 0)
           && sym.name.contentEquals(methodSymbol.name)
-          && methodSymbol.overrides(
-              sym, (TypeSymbol) methodSymbol.owner, types, /* checkResult= */ true)) {
+          && methodSymbol.overrides(sym, (TypeSymbol) methodSymbol.owner, types, true)) {
         return (MethodSymbol) sym;
       }
     }
@@ -486,7 +470,7 @@ public class ASTHelpers {
   }
 
   public static Set<MethodSymbol> findSuperMethods(MethodSymbol methodSymbol, Types types) {
-    return findSuperMethods(methodSymbol, types, /* skipInterfaces= */ false)
+    return findSuperMethods(methodSymbol, types, false)
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
@@ -495,7 +479,7 @@ public class ASTHelpers {
    * method}.
    */
   public static Optional<MethodSymbol> findSuperMethod(MethodSymbol methodSymbol, Types types) {
-    return findSuperMethods(methodSymbol, types, /* skipInterfaces= */ true).findFirst();
+    return findSuperMethods(methodSymbol, types, true).findFirst();
   }
 
   private static Stream<MethodSymbol> findSuperMethods(
@@ -549,8 +533,7 @@ public class ASTHelpers {
     Name annotationName = state.getName(annotationClass);
     Symbol annotationSym;
     synchronized (state.context) {
-      annotationSym =
-          state.getSymtab().enterClass(state.inferModule(annotationName), annotationName);
+      annotationSym = state.getSymtab().enterClass(state.getSymtab().java_base, annotationName);
     }
     try {
       annotationSym.complete();
@@ -957,158 +940,5 @@ public class ASTHelpers {
     } finally {
       log.popDiagnosticHandler(handler);
     }
-  }
-
-  /**
-   * Returns the values of the given symbol's {@code javax.annotation.Generated} or {@code
-   * javax.annotation.processing.Generated} annotation, if present.
-   */
-  public static ImmutableSet<String> getGeneratedBy(ClassSymbol symbol, VisitorState state) {
-    checkNotNull(symbol);
-    Optional<Compound> c =
-        Stream.of("javax.annotation.Generated", "javax.annotation.processing.Generated")
-            .map(state::getSymbolFromString)
-            .filter(a -> a != null)
-            .map(symbol::attribute)
-            .filter(a -> a != null)
-            .findFirst();
-    if (!c.isPresent()) {
-      return ImmutableSet.of();
-    }
-    Optional<Attribute> values =
-        c.get()
-            .getElementValues()
-            .entrySet()
-            .stream()
-            .filter(e -> e.getKey().getSimpleName().contentEquals("value"))
-            .map(e -> e.getValue())
-            .findAny();
-    if (!values.isPresent()) {
-      return ImmutableSet.of();
-    }
-    ImmutableSet.Builder<String> suppressions = ImmutableSet.builder();
-    values
-        .get()
-        .accept(
-            new SimpleAnnotationValueVisitor8<Void, Void>() {
-              @Override
-              public Void visitString(String s, Void aVoid) {
-                suppressions.add(s);
-                return super.visitString(s, aVoid);
-              }
-
-              @Override
-              public Void visitArray(List<? extends AnnotationValue> vals, Void aVoid) {
-                vals.stream().forEachOrdered(v -> v.accept(this, null));
-                return super.visitArray(vals, aVoid);
-              }
-            },
-            null);
-    return suppressions.build();
-  }
-
-  /** An expression's target type, see {@link #targetType}. */
-  @AutoValue
-  public abstract static class TargetType {
-    public abstract Type type();
-
-    public abstract TreePath path();
-
-    static TargetType create(Type type, TreePath path) {
-      return new AutoValue_ASTHelpers_TargetType(type, path);
-    }
-  }
-
-  /**
-   * Returns the target type of the tree at the given {@link VisitorState}'s path, or else {@code
-   * null}.
-   *
-   * <p>For example, the target type of an assignment expression is the variable's type, and the
-   * target type of a return statement is the enclosing method's type.
-   */
-  @Nullable
-  public static TargetType targetType(VisitorState state) {
-    TreePath path = state.getPath();
-    TreePath prev = null;
-    do {
-      prev = path;
-      path = path.getParentPath();
-    } while (path != null && path.getLeaf().getKind() == Kind.PARENTHESIZED);
-    if (path == null) {
-      return null;
-    }
-    TreePath current = prev;
-    TreePath parent = path;
-    Type type =
-        new TreeScanner<Type, Void>() {
-          @Override
-          public Type visitAssignment(AssignmentTree node, Void unused) {
-            return getType(node.getVariable());
-          }
-
-          @Override
-          public Type visitCompoundAssignment(CompoundAssignmentTree node, Void unused) {
-            return getType(node.getVariable());
-          }
-
-          @Override
-          public Type visitLambdaExpression(
-              LambdaExpressionTree lambdaExpressionTree, Void unused) {
-            return state
-                .getTypes()
-                .findDescriptorType(getType(lambdaExpressionTree))
-                .getReturnType();
-          }
-
-          @Override
-          public Type visitReturn(ReturnTree node, Void unused) {
-            for (TreePath path = parent; path != null; path = path.getParentPath()) {
-              Tree enclosing = path.getLeaf();
-              switch (enclosing.getKind()) {
-                case METHOD:
-                  return getType(((MethodTree) enclosing).getReturnType());
-                case LAMBDA_EXPRESSION:
-                  return visitLambdaExpression((LambdaExpressionTree) enclosing, null);
-                default: // fall out
-              }
-            }
-            throw new AssertionError("return not enclosed by method or lambda");
-          }
-
-          @Override
-          public Type visitVariable(VariableTree node, Void unused) {
-            return getType(node.getType());
-          }
-
-          @Override
-          public Type visitBinary(BinaryTree tree, Void unused) {
-            return ASTHelpers.getType(
-                tree.getLeftOperand().equals(current.getLeaf())
-                    ? tree.getRightOperand()
-                    : tree.getLeftOperand());
-          }
-
-          @Override
-          public Type visitMethodInvocation(MethodInvocationTree tree, Void unused) {
-            int idx = tree.getArguments().indexOf(current.getLeaf());
-            if (idx == -1) {
-              return null;
-            }
-            MethodSymbol sym = ASTHelpers.getSymbol(tree);
-            if (sym.getParameters().size() <= idx) {
-              Preconditions.checkState(sym.isVarArgs());
-              idx = sym.getParameters().size() - 1;
-            }
-            Type type = sym.getParameters().get(idx).asType();
-            if (sym.isVarArgs() && idx == sym.getParameters().size() - 1) {
-              type = state.getTypes().elemtype(type);
-            }
-            return type;
-          }
-        }.scan(parent.getLeaf(), null);
-    if (type == null) {
-      return null;
-    }
-    return TargetType.create(type, parent);
   }
 }

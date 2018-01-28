@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The Error Prone Authors.
+ * Copyright 2015 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,6 @@ public class EqualsIncompatibleTypeTest {
   @Test
   public void testNegativeCase() throws Exception {
     compilationHelper.addSourceFile("EqualsIncompatibleTypeNegativeCases.java").doTest();
-  }
-
-  @Test
-  public void testNegativeCase_recursive() throws Exception {
-    compilationHelper.addSourceFile("EqualsIncompatibleTypeRecursiveTypes.java").doTest();
   }
 
   @Test

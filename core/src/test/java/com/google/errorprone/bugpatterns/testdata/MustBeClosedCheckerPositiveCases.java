@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 The Error Prone Authors.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.google.errorprone.bugpatterns.testdata;
 
 import com.google.errorprone.annotations.MustBeClosed;
-import java.util.stream.Stream;
 
 public class MustBeClosedCheckerPositiveCases {
 
@@ -64,7 +63,6 @@ public class MustBeClosedCheckerPositiveCases {
   }
 
   static interface Lambda {
-
     Closeable expression();
   }
 
@@ -144,24 +142,5 @@ public class MustBeClosedCheckerPositiveCases {
     try {
     } finally {
     }
-  }
-
-  class CloseableFoo implements AutoCloseable {
-
-    @MustBeClosed
-    CloseableFoo() {}
-
-    // Doesn't autoclose Foo on Stream close.
-    Stream<String> stream() {
-      return null;
-    }
-
-    @Override
-    public void close() {}
-  }
-
-  void twrStream() {
-    // BUG: Diagnostic contains:
-    try (Stream<String> stream = new CloseableFoo().stream()) {}
   }
 }

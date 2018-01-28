@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package com.google.errorprone.scanner;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.errorprone.BugPattern.Category.JDK;
-import static com.google.errorprone.BugPattern.SeverityLevel.ERROR;
 import static com.google.errorprone.scanner.BuiltInCheckerSuppliers.getSuppliers;
 import static org.junit.Assert.expectThrows;
 
@@ -29,7 +27,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.errorprone.BugCheckerInfo;
-import com.google.errorprone.BugPattern;
 import com.google.errorprone.BugPattern.SeverityLevel;
 import com.google.errorprone.ErrorProneJavaCompilerTest;
 import com.google.errorprone.ErrorProneJavaCompilerTest.UnsuppressibleArrayEquals;
@@ -43,7 +40,6 @@ import com.google.errorprone.bugpatterns.DepAnn;
 import com.google.errorprone.bugpatterns.DivZero;
 import com.google.errorprone.bugpatterns.EqualsIncompatibleType;
 import com.google.errorprone.bugpatterns.LongLiteralLowerCaseSuffix;
-import com.google.errorprone.bugpatterns.PackageLocation;
 import com.google.errorprone.bugpatterns.PreconditionsCheckNotNull;
 import com.google.errorprone.bugpatterns.RestrictedApiChecker;
 import com.google.errorprone.bugpatterns.StaticQualifiedUsingExpression;
@@ -455,38 +451,6 @@ public class ScannerSupplierTest {
             "ChainingConstructorIgnoresParameter",
             SeverityLevel.WARNING);
     assertScanner(withOverrides).hasSeverities(expectedSeverities);
-  }
-
-  @Test
-  public void disablingPackageLocation_suppressible() throws Exception {
-    ScannerSupplier ss = ScannerSupplier.fromBugCheckerClasses(PackageLocation.class);
-    ErrorProneOptions epOptions =
-        ErrorProneOptions.processArgs(ImmutableList.of("-Xep:PackageLocation:OFF"));
-
-    ScannerSupplier overrides = ss.applyOverrides(epOptions);
-    assertScanner(overrides).hasEnabledChecks(); // no checks are enabled
-  }
-
-  /** An unsuppressible version of {@link PackageLocation}. */
-  @BugPattern(
-    name = "PackageLocation",
-    summary = "",
-    category = JDK,
-    severity = ERROR,
-    suppressionAnnotations = {},
-    disableable = false
-  )
-  public static class UnsuppressiblePackageLocation extends PackageLocation {}
-
-  @Test
-  public void disablingPackageLocation_unsuppressible() throws Exception {
-    ScannerSupplier ss = ScannerSupplier.fromBugCheckerClasses(UnsuppressiblePackageLocation.class);
-    ErrorProneOptions epOptions =
-        ErrorProneOptions.processArgs(ImmutableList.of("-Xep:PackageLocation:OFF"));
-
-    InvalidCommandLineOptionException exception =
-        expectThrows(InvalidCommandLineOptionException.class, () -> ss.applyOverrides(epOptions));
-    assertThat(exception.getMessage()).contains("may not be disabled");
   }
 
   private static class ScannerSupplierSubject

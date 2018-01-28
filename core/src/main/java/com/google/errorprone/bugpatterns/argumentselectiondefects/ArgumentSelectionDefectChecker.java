@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Error Prone Authors.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.BugPattern;
-import com.google.errorprone.BugPattern.ProvidesFix;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
 import com.google.errorprone.bugpatterns.BugChecker.NewClassTreeMatcher;
+import com.google.errorprone.fixes.SuggestedFix;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.names.NamingConventions;
 import com.google.errorprone.names.NeedlemanWunschEditDistance;
@@ -64,8 +64,7 @@ import java.util.function.Function;
           + "swap clear to future readers of the code. Argument names annotated with a comment "
           + "containing the parameter name will not generate a warning.",
   category = JDK,
-  severity = WARNING,
-  providesFix = ProvidesFix.REQUIRES_HUMAN_ATTENTION
+  severity = WARNING
 )
 public class ArgumentSelectionDefectChecker extends BugChecker
     implements MethodInvocationTreeMatcher, NewClassTreeMatcher {
@@ -128,17 +127,16 @@ public class ArgumentSelectionDefectChecker extends BugChecker
       return Description.NO_MATCH;
     }
 
-    Description.Builder description =
-        buildDescription(invocationInfo.tree()).setMessage(changes.describe(invocationInfo));
+    // Fix1: permute the arguments as required
+    SuggestedFix permuteArgumentsFix = changes.buildPermuteArgumentsFix(invocationInfo);
 
-    // Fix 1 (semantics-preserving): apply comments with parameter names to potentially-swapped
-    // arguments of the method
-    description.addFix(changes.buildCommentArgumentsFix(invocationInfo));
+    // Fix2: apply comments with parameter names to potentially-swapped arguments of the method
+    SuggestedFix commentArgumentsFix = changes.buildCommentArgumentsFix(invocationInfo);
 
-    // Fix 2: permute the arguments as required
-    description.addFix(changes.buildPermuteArgumentsFix(invocationInfo));
-
-    return description.build();
+    return buildDescription(invocationInfo.tree())
+        .addFix(permuteArgumentsFix)
+        .addFix(commentArgumentsFix)
+        .build();
   }
 
   /**

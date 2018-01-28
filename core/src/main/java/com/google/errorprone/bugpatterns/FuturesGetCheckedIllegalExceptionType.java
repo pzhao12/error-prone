@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The Error Prone Authors.
+ * Copyright 2015 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -30,7 +30,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.errorprone.BugPattern;
-import com.google.errorprone.BugPattern.ProvidesFix;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
 import com.google.errorprone.fixes.Fix;
@@ -47,7 +46,6 @@ import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Type.ClassType;
 import com.sun.tools.javac.code.Types;
-import java.util.List;
 
 /**
  * Checks for calls to Guava's {@code Futures.getChecked} method that will always fail because they
@@ -61,8 +59,7 @@ import java.util.List;
           + "public constructor whose only parameters are of type String or Throwable. getChecked "
           + "will reject any other type with an IllegalArgumentException.",
   category = GUAVA,
-  severity = ERROR,
-  providesFix = ProvidesFix.REQUIRES_HUMAN_ATTENTION
+  severity = ERROR
 )
 public final class FuturesGetCheckedIllegalExceptionType extends BugChecker
     implements MethodInvocationTreeMatcher {
@@ -110,8 +107,7 @@ public final class FuturesGetCheckedIllegalExceptionType extends BugChecker
             return false;
           }
 
-          List<Type> typeArguments = ((ClassType) argType).getTypeArguments();
-          Type exceptionType = typeArguments.isEmpty() ? null : typeArguments.get(0);
+          Type exceptionType = ((ClassType) argType).getTypeArguments().head;
           return types.isSubtype(exceptionType, runtimeExceptionType);
         }
       };

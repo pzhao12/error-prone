@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 The Error Prone Authors.
+ * Copyright 2011 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.BugPattern;
 import com.google.errorprone.BugPattern.SeverityLevel;
+import com.google.errorprone.BugPattern.Suppressibility;
 import com.google.errorprone.ErrorProneError;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
@@ -250,7 +251,9 @@ public class ErrorProneScanner extends Scanner {
   private final List<WildcardTreeMatcher> wildcardMatchers = new ArrayList<>();
 
   private void registerNodeTypes(BugChecker checker) {
-    customSuppressionAnnotations.addAll(checker.customSuppressionAnnotations());
+    if (checker.suppressibility() == Suppressibility.CUSTOM_ANNOTATION) {
+      customSuppressionAnnotations.addAll(checker.customSuppressionAnnotations());
+    }
 
     if (checker instanceof AnnotationTreeMatcher) {
       annotationMatchers.add((AnnotationTreeMatcher) checker);

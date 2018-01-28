@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,35 +230,35 @@ public class NarrowingCompoundAssignmentTest {
 
   @Test
   public void testPreservePrecedenceExhaustive() throws Exception {
-    testPrecedence("*", "*", /* parens= */ true);
-    testPrecedence("*", "+", /* parens= */ true);
-    testPrecedence("*", "<<", /* parens= */ true);
-    testPrecedence("*", "&", /* parens= */ true);
-    testPrecedence("*", "|", /* parens= */ true);
+    testPrecedence("*", "*", true);
+    testPrecedence("*", "+", true);
+    testPrecedence("*", "<<", true);
+    testPrecedence("*", "&", true);
+    testPrecedence("*", "|", true);
 
-    testPrecedence("+", "*", /* parens= */ false);
-    testPrecedence("+", "+", /* parens= */ true);
-    testPrecedence("+", "<<", /* parens= */ true);
-    testPrecedence("+", "&", /* parens= */ true);
-    testPrecedence("+", "|", /* parens= */ true);
+    testPrecedence("+", "*", false);
+    testPrecedence("+", "+", true);
+    testPrecedence("+", "<<", true);
+    testPrecedence("+", "&", true);
+    testPrecedence("+", "|", true);
 
-    testPrecedence("<<", "*", /* parens= */ false);
-    testPrecedence("<<", "+", /* parens= */ false);
-    testPrecedence("<<", "<<", /* parens= */ true);
-    testPrecedence("<<", "&", /* parens= */ true);
-    testPrecedence("<<", "|", /* parens= */ true);
+    testPrecedence("<<", "*", false);
+    testPrecedence("<<", "+", false);
+    testPrecedence("<<", "<<", true);
+    testPrecedence("<<", "&", true);
+    testPrecedence("<<", "|", true);
 
-    testPrecedence("&", "*", /* parens= */ false);
-    testPrecedence("&", "+", /* parens= */ false);
-    testPrecedence("&", "<<", /* parens= */ false);
-    testPrecedence("&", "&", /* parens= */ true);
-    testPrecedence("&", "|", /* parens= */ true);
+    testPrecedence("&", "*", false);
+    testPrecedence("&", "+", false);
+    testPrecedence("&", "<<", false);
+    testPrecedence("&", "&", true);
+    testPrecedence("&", "|", true);
 
-    testPrecedence("|", "*", /* parens= */ false);
-    testPrecedence("|", "+", /* parens= */ false);
-    testPrecedence("|", "<<", /* parens= */ false);
-    testPrecedence("|", "&", /* parens= */ false);
-    testPrecedence("|", "|", /* parens= */ true);
+    testPrecedence("|", "*", false);
+    testPrecedence("|", "+", false);
+    testPrecedence("|", "<<", false);
+    testPrecedence("|", "&", false);
+    testPrecedence("|", "|", true);
   }
 
   private void testPrecedence(String opA, String opB, boolean parens) throws Exception {

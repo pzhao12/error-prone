@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 The Error Prone Authors.
+ * Copyright 2012 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ import com.google.errorprone.BugPattern.ProvidesFix;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
-import com.google.errorprone.bugpatterns.EqualsIncompatibleType;
-import com.google.errorprone.bugpatterns.EqualsIncompatibleType.TypeCompatibilityReport;
 import com.google.errorprone.bugpatterns.collectionincompatibletype.AbstractCollectionIncompatibleTypeMatcher.MatchResult;
 import com.google.errorprone.fixes.Fix;
 import com.google.errorprone.fixes.SuggestedFix;
@@ -151,10 +149,8 @@ public class CollectionIncompatibleType extends BugChecker implements MethodInvo
     MatchResult result = MoreObjects.firstNonNull(directResult, typeArgResult);
 
     Types types = state.getTypes();
-    TypeCompatibilityReport compatibilityReport =
-        EqualsIncompatibleType.compatibilityOfTypes(
-            result.targetType(), result.sourceType(), state);
-    if (compatibilityReport.compatible()) {
+    if (types.isCastable(
+        result.sourceType(), types.erasure(ASTHelpers.getUpperBound(result.targetType(), types)))) {
       return Description.NO_MATCH;
     }
 

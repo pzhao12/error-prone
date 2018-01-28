@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The Error Prone Authors.
+ * Copyright 2015 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.CompilationTestHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,6 +109,17 @@ public class PackageLocationTest {
             "src/main/java/a/b/A.java", //
             "package a.b;",
             "class A {}")
+        .doTest();
+  }
+
+  @Test
+  public void negativeAndroid() {
+    compilationHelper
+        .addSourceLines(
+            "src/main/java/a/b/A.java", //
+            "package a;",
+            "class A {}")
+        .setArgs(ImmutableList.of("-XDandroidCompatible=true"))
         .doTest();
   }
 

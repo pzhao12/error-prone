@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 The Error Prone Authors.
+ * Copyright 2013 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,9 @@ public class ConstructorOfClassTest extends CompilerBasedAbstractTest {
     writeFile("A.java", "package com.google;", "public class A {", "  private A() {}", "}");
     assertCompiles(
         classMatches(
-            /* shouldMatch= */ true,
-            new ConstructorOfClass(AT_LEAST_ONE, methodHasVisibility(Visibility.PRIVATE))));
+            true, new ConstructorOfClass(AT_LEAST_ONE, methodHasVisibility(Visibility.PRIVATE))));
     assertCompiles(
-        classMatches(
-            /* shouldMatch= */ true,
-            new ConstructorOfClass(ALL, methodHasVisibility(Visibility.PRIVATE))));
+        classMatches(true, new ConstructorOfClass(ALL, methodHasVisibility(Visibility.PRIVATE))));
   }
 
   @Test
@@ -72,12 +69,9 @@ public class ConstructorOfClassTest extends CompilerBasedAbstractTest {
     writeFile("A.java", "package com.google;", "public class A {", "}");
     assertCompiles(
         classMatches(
-            /* shouldMatch= */ false,
-            new ConstructorOfClass(AT_LEAST_ONE, methodHasVisibility(Visibility.PRIVATE))));
+            false, new ConstructorOfClass(AT_LEAST_ONE, methodHasVisibility(Visibility.PRIVATE))));
     assertCompiles(
-        classMatches(
-            /* shouldMatch= */ false,
-            new ConstructorOfClass(ALL, methodHasVisibility(Visibility.PRIVATE))));
+        classMatches(false, new ConstructorOfClass(ALL, methodHasVisibility(Visibility.PRIVATE))));
   }
 
   @Test
@@ -85,12 +79,9 @@ public class ConstructorOfClassTest extends CompilerBasedAbstractTest {
     writeFile("A.java", "package com.google;", "public class A {", "  public A() {}", "}");
     assertCompiles(
         classMatches(
-            /* shouldMatch= */ false,
-            new ConstructorOfClass(AT_LEAST_ONE, methodHasVisibility(Visibility.PRIVATE))));
+            false, new ConstructorOfClass(AT_LEAST_ONE, methodHasVisibility(Visibility.PRIVATE))));
     assertCompiles(
-        classMatches(
-            /* shouldMatch= */ false,
-            new ConstructorOfClass(ALL, methodHasVisibility(Visibility.PRIVATE))));
+        classMatches(false, new ConstructorOfClass(ALL, methodHasVisibility(Visibility.PRIVATE))));
   }
 
   @Test
@@ -104,12 +95,9 @@ public class ConstructorOfClassTest extends CompilerBasedAbstractTest {
         "}");
     assertCompiles(
         classMatches(
-            /* shouldMatch= */ true,
-            new ConstructorOfClass(AT_LEAST_ONE, methodHasVisibility(Visibility.PRIVATE))));
+            true, new ConstructorOfClass(AT_LEAST_ONE, methodHasVisibility(Visibility.PRIVATE))));
     assertCompiles(
-        classMatches(
-            /* shouldMatch= */ false,
-            new ConstructorOfClass(ALL, methodHasVisibility(Visibility.PRIVATE))));
+        classMatches(false, new ConstructorOfClass(ALL, methodHasVisibility(Visibility.PRIVATE))));
   }
 
   private abstract class ScannerTest extends Scanner {

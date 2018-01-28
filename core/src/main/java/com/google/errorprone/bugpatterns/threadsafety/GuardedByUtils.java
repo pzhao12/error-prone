@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Error Prone Authors.
+ * Copyright 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,12 +60,7 @@ public class GuardedByUtils {
 
   public static JCTree.JCExpression parseString(String guardedByString, Context context) {
     JavacParser parser =
-        ParserFactory.instance(context)
-            .newParser(
-                guardedByString,
-                /* keepDocComments= */ false,
-                /* keepEndPos= */ true,
-                /* keepLineMap= */ false);
+        ParserFactory.instance(context).newParser(guardedByString, false, true, false);
     JCTree.JCExpression exp;
     try {
       exp = parser.parseExpression();
