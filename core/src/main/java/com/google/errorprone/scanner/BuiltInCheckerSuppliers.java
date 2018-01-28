@@ -34,6 +34,7 @@ import com.google.errorprone.bugpatterns.BadAnnotationImplementation;
 import com.google.errorprone.bugpatterns.BadComparable;
 import com.google.errorprone.bugpatterns.BadShiftAmount;
 import com.google.errorprone.bugpatterns.BigDecimalLiteralDouble;
+import com.google.errorprone.bugpatterns.BooleanParameter;
 import com.google.errorprone.bugpatterns.BoxedPrimitiveConstructor;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.bugpatterns.CannotMockFinalClass;
@@ -120,6 +121,7 @@ import com.google.errorprone.bugpatterns.MissingCasesInEnumSwitch;
 import com.google.errorprone.bugpatterns.MissingDefault;
 import com.google.errorprone.bugpatterns.MissingFail;
 import com.google.errorprone.bugpatterns.MissingOverride;
+import com.google.errorprone.bugpatterns.MissingSuperCall;
 import com.google.errorprone.bugpatterns.MisusedWeekYear;
 import com.google.errorprone.bugpatterns.MixedArrayDimensions;
 import com.google.errorprone.bugpatterns.MockitoCast;
@@ -376,6 +378,7 @@ public class BuiltInCheckerSuppliers {
           LiteByteStringUtf8.class,
           LoopConditionChecker.class,
           MislabeledAndroidString.class,
+          MissingSuperCall.class,
           MisusedWeekYear.class,
           MockitoCast.class,
           MockitoUsage.class,
@@ -517,6 +520,7 @@ public class BuiltInCheckerSuppliers {
           ClassName.class,
           ComparisonContractViolated.class,
           ConstantField.class,
+          BooleanParameter.class,
           ConstructorInvokesOverridable.class,
           ConstructorLeaksThis.class,
           DepAnn.class,
