@@ -99,7 +99,7 @@ public class ImportStatementsTest {
      * @return a new JCImport stub
      */
     StubImportBuilder addImport(String typeName) {
-      return addImport(typeName, /* isStatic= */ false);
+      return addImport(typeName, false);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ImportStatementsTest {
      * @return a new JCImport stub
      */
     StubImportBuilder addStaticImport(String typeName) {
-      return addImport(typeName, /* isStatic= */ true);
+      return addImport(typeName, true);
     }
 
     /**
@@ -135,7 +135,7 @@ public class ImportStatementsTest {
 
       // TODO(b/67738557): consolidate helpers for creating fake trees
       JCImport result =
-          new JCImport(/* qualid= */ null, /* importStatic= */ isStatic) {
+          new JCImport(/* qualid= */ null, /* static= */ isStatic) {
             @Override
             public int getStartPosition() {
               return curStartPos;

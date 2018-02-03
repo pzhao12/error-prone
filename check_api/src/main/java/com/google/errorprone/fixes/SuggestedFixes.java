@@ -29,6 +29,7 @@ import static com.sun.tools.javac.code.TypeTag.CLASS;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
@@ -50,6 +51,8 @@ import com.sun.source.tree.AnnotationTree;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.ImportTree;
+import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.ModifiersTree;
 import com.sun.source.tree.NewArrayTree;
@@ -82,7 +85,6 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -137,12 +139,12 @@ public class SuggestedFixes {
     }
   }
 
-  /** Adds modifiers to the given class, method, or field declaration. */
-  public static Optional<SuggestedFix> addModifiers(
-      Tree tree, VisitorState state, Modifier... modifiers) {
+  /** Add modifiers to the given class, method, or field declaration. */
+  @Nullable
+  public static SuggestedFix addModifiers(Tree tree, VisitorState state, Modifier... modifiers) {
     ModifiersTree originalModifiers = getModifiers(tree);
     if (originalModifiers == null) {
-      return Optional.empty();
+      return null;
     }
     Set<Modifier> toAdd =
         Sets.difference(new TreeSet<>(Arrays.asList(modifiers)), originalModifiers.getFlags());
@@ -152,7 +154,7 @@ public class SuggestedFixes {
               ? state.getEndPosition(originalModifiers) + 1
               : ((JCTree) tree).getStartPosition();
       int base = ((JCTree) tree).getStartPosition();
-      Optional<Integer> insert =
+      java.util.Optional<Integer> insert =
           state
               .getTokensForNode(tree)
               .stream()
@@ -160,8 +162,7 @@ public class SuggestedFixes {
               .filter(thisPos -> thisPos >= pos)
               .findFirst();
       int insertPos = insert.orElse(pos); // shouldn't ever be able to get to the else
-      return Optional.of(
-          SuggestedFix.replace(insertPos, insertPos, Joiner.on(' ').join(toAdd) + " "));
+      return SuggestedFix.replace(insertPos, insertPos, Joiner.on(' ').join(toAdd) + " ");
     }
     // a map from modifiers to modifier position (or -1 if the modifier is being added)
     // modifiers are sorted in Google Java Style order
@@ -193,16 +194,16 @@ public class SuggestedFixes {
     if (!modifiersToWrite.isEmpty()) {
       fix.postfixWith(originalModifiers, " " + Joiner.on(' ').join(modifiersToWrite));
     }
-    return Optional.of(fix.build());
+    return fix.build();
   }
 
   /** Remove modifiers from the given class, method, or field declaration. */
-  public static Optional<SuggestedFix> removeModifiers(
-      Tree tree, VisitorState state, Modifier... modifiers) {
+  @Nullable
+  public static SuggestedFix removeModifiers(Tree tree, VisitorState state, Modifier... modifiers) {
     Set<Modifier> toRemove = ImmutableSet.copyOf(modifiers);
     ModifiersTree originalModifiers = getModifiers(tree);
     if (originalModifiers == null) {
-      return Optional.empty();
+      return null;
     }
     SuggestedFix.Builder fix = SuggestedFix.builder();
     List<ErrorProneToken> tokens = state.getTokensForNode(originalModifiers);
@@ -217,9 +218,9 @@ public class SuggestedFixes {
       }
     }
     if (empty) {
-      return Optional.empty();
+      return null;
     }
-    return Optional.of(fix.build());
+    return fix.build();
   }
 
   /**
@@ -244,17 +245,28 @@ public class SuggestedFixes {
         break;
       }
       if (curr.owner != null && curr.owner.getKind() == ElementKind.PACKAGE) {
-        // If the owner of curr is a package, we can't do anything except import or fully-qualify
-        // the type name.
-        if (found != null) {
+        if (importClash(state, curr)) {
           names.addFirst(curr.owner.getQualifiedName().toString());
+          break;
         } else {
           fix.addImport(curr.getQualifiedName().toString());
+          break;
         }
-        break;
       }
     }
     return Joiner.on('.').join(names);
+  }
+
+  private static boolean importClash(VisitorState state, Symbol sym) {
+    for (ImportTree importTree : state.getPath().getCompilationUnit().getImports()) {
+      if (((MemberSelectTree) importTree.getQualifiedIdentifier())
+              .getIdentifier()
+              .contentEquals(sym.getSimpleName())
+          && !sym.equals(ASTHelpers.getSymbol(importTree.getQualifiedIdentifier()))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** Returns a human-friendly name of the given type for use in fixes. */
@@ -595,7 +607,7 @@ public class SuggestedFixes {
         }
       }
     }
-    return Optional.empty();
+    return Optional.absent();
   }
 
   /**

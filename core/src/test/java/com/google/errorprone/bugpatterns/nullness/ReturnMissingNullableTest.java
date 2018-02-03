@@ -16,7 +16,6 @@
 
 package com.google.errorprone.bugpatterns.nullness;
 
-import com.google.errorprone.BugCheckerRefactoringTestHelper;
 import com.google.errorprone.CompilationTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -329,70 +328,13 @@ public class ReturnMissingNullableTest {
             "import javax.annotation.Nullable;",
             "public class MissingNullableReturnTest {",
             "  public static java.util.function.Function<String, String> identity() {",
-            "    return s -> s;",
-            "  }",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void testNegativeCases_returnParenthesizedLambda() throws Exception {
-    createCompilationTestHelper()
-        .addSourceLines(
-            "com/google/errorprone/bugpatterns/nullness/MissingNullableReturnTest.java",
-            "package com.google.errorprone.bugpatterns.nullness;",
-            "import javax.annotation.Nullable;",
-            "public class MissingNullableReturnTest {",
-            "  public static java.util.function.Function<String, String> identity() {",
             "    return (s -> s);",
             "  }",
             "}")
         .doTest();
   }
 
-  @Test
-  public void testSuggestNonJsr305Nullable() throws Exception {
-    createRefactoringTestHelper()
-        .addInputLines(
-            "in/Test.java",
-            "class T {",
-            "  @Nullable private final Object obj1 = null;",
-            "  private final Object method() { return null; }",
-            "  @interface Nullable {}",
-            "}")
-        .addOutputLines(
-            "out/Test.java",
-            "class T {",
-            "  @Nullable private final Object obj1 = null;",
-            "  @Nullable private final Object method() { return null; }",
-            "  @interface Nullable {}",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void testNonAnnotationNullable() throws Exception {
-    createRefactoringTestHelper()
-        .addInputLines(
-            "in/Test.java",
-            "class T {",
-            "  private final Object method() { return null; }",
-            "  class Nullable {}",
-            "}")
-        .addOutputLines(
-            "out/Test.java",
-            "class T {",
-            "  @javax.annotation.Nullable private final Object method() { return null; }",
-            "  class Nullable {}",
-            "}")
-        .doTest();
-  }
-
   private CompilationTestHelper createCompilationTestHelper() {
     return CompilationTestHelper.newInstance(ReturnMissingNullable.class, getClass());
-  }
-
-  private BugCheckerRefactoringTestHelper createRefactoringTestHelper() {
-    return BugCheckerRefactoringTestHelper.newInstance(new ReturnMissingNullable(), getClass());
   }
 }

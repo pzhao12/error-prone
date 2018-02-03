@@ -43,8 +43,7 @@ public class InstanceMethodTest extends CompilerBasedAbstractTest {
         "}");
     assertCompiles(
         memberSelectMatches(
-            /* shouldMatch= */ true,
-            new InstanceMethod(Matchers.<ExpressionTree>isArrayType(), "hashCode")));
+            true, new InstanceMethod(Matchers.<ExpressionTree>isArrayType(), "hashCode")));
   }
 
   @Test
@@ -59,8 +58,7 @@ public class InstanceMethodTest extends CompilerBasedAbstractTest {
         "}");
     assertCompiles(
         memberSelectMatches(
-            /* shouldMatch= */ true,
-            InstanceMethod.methodReceiverMatcher(Matchers.<ExpressionTree>isArrayType())));
+            true, InstanceMethod.methodReceiverMatcher(Matchers.<ExpressionTree>isArrayType())));
   }
 
   @Test
@@ -75,8 +73,7 @@ public class InstanceMethodTest extends CompilerBasedAbstractTest {
         "}");
     assertCompiles(
         memberSelectMatches(
-            /* shouldMatch= */ false,
-            new InstanceMethod(Matchers.<ExpressionTree>isArrayType(), "notHashCode")));
+            false, new InstanceMethod(Matchers.<ExpressionTree>isArrayType(), "notHashCode")));
   }
 
   @Test
@@ -91,8 +88,7 @@ public class InstanceMethodTest extends CompilerBasedAbstractTest {
         "}");
     assertCompiles(
         memberSelectMatches(
-            /* shouldMatch= */ false,
-            new InstanceMethod(Matchers.<ExpressionTree>isArrayType(), "hashCode")));
+            false, new InstanceMethod(Matchers.<ExpressionTree>isArrayType(), "hashCode")));
   }
 
   @Test
@@ -115,8 +111,7 @@ public class InstanceMethodTest extends CompilerBasedAbstractTest {
         "}");
     assertCompiles(
         memberSelectMatches(
-            /* shouldMatch= */ false,
-            new InstanceMethod(Matchers.<ExpressionTree>anything(), "count")));
+            false, new InstanceMethod(Matchers.<ExpressionTree>anything(), "count")));
   }
 
   private Scanner memberSelectMatches(final boolean shouldMatch, final InstanceMethod toMatch) {

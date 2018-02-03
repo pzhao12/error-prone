@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-package com.google.errorprone.annotations;
+package android.support.annotation;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PACKAGE;
 import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.lang.annotation.RetentionPolicy.CLASS;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-/**
- * Indicates that the return value of the annotated method must be checked. An error is triggered
- * when one of these methods is called but the result is not used.
- *
- * <p>{@code @CheckReturnValue} may be applied to a class or package to indicate that all methods in
- * that class or package must have their return values checked. For convenience, we provide an
- * annotation, {@link CanIgnoreReturnValue}, to exempt specific methods or classes from this
- * behavior.
- */
-@Documented
-@Target({METHOD, CONSTRUCTOR, TYPE, PACKAGE})
-@Retention(RUNTIME)
-public @interface CheckReturnValue {}
+@Retention(CLASS)
+@Target({ANNOTATION_TYPE, TYPE, METHOD, CONSTRUCTOR, FIELD, PACKAGE})
+public @interface RestrictTo {
+
+  /** The scope to which usage should be restricted. */
+  Scope[] value();
+
+  enum Scope {
+    LIBRARY,
+    LIBRARY_GROUP,
+    @Deprecated
+    GROUP_ID,
+    TESTS,
+    SUBCLASSES,
+  }
+}

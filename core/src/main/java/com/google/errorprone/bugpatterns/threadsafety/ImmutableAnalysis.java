@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -113,36 +112,17 @@ public class ImmutableAnalysis {
   private final String nonFinalFieldMessage;
   private final String mutableFieldMessage;
 
-  private final ImmutableSet<String> immutableAnnotations;
-
-  public ImmutableAnalysis(
-      BugChecker bugChecker,
-      VisitorState state,
-      WellKnownMutability wellKnownMutability,
-      String nonFinalFieldMessage,
-      String mutableFieldMessage,
-      ImmutableSet<String> immutableAnnotations) {
-    this.bugChecker = bugChecker;
-    this.state = state;
-    this.wellKnownMutability = wellKnownMutability;
-    this.nonFinalFieldMessage = nonFinalFieldMessage;
-    this.mutableFieldMessage = mutableFieldMessage;
-    this.immutableAnnotations = immutableAnnotations;
-  }
-
   public ImmutableAnalysis(
       BugChecker bugChecker,
       VisitorState state,
       WellKnownMutability wellKnownMutability,
       String nonFinalFieldMessage,
       String mutableFieldMessage) {
-    this(
-        bugChecker,
-        state,
-        wellKnownMutability,
-        nonFinalFieldMessage,
-        mutableFieldMessage,
-        ImmutableSet.of(Immutable.class.getName()));
+    this.bugChecker = bugChecker;
+    this.state = state;
+    this.wellKnownMutability = wellKnownMutability;
+    this.nonFinalFieldMessage = nonFinalFieldMessage;
+    this.mutableFieldMessage = mutableFieldMessage;
   }
 
   /**
@@ -177,12 +157,9 @@ public class ImmutableAnalysis {
       }
     }
 
-    if (!type.asElement().isEnum()) {
-      // don't check enum super types here to avoid double-reporting errors
-      info = checkSuper(immutableTyParams, type);
-      if (info.isPresent()) {
-        return info;
-      }
+    info = checkSuper(immutableTyParams, type);
+    if (info.isPresent()) {
+      return info;
     }
     Type mutableEnclosing = mutableEnclosingInstance(tree, type);
     if (mutableEnclosing != null) {
@@ -451,10 +428,7 @@ public class ImmutableAnalysis {
         return Violation.absent();
       }
       return Violation.of(
-          String.format(
-              "the declaration of type '%s' is not annotated with %s",
-              type,
-              immutableAnnotations.stream().map(a -> "@" + a).collect(Collectors.joining(" or "))));
+          String.format("the declaration of type '%s' is not annotated @Immutable", type));
     }
   }
 
@@ -475,15 +449,13 @@ public class ImmutableAnalysis {
    * Gets the possibly inherited {@code @Immutable} annotation on the given symbol, and
    * reverse-propagates containerOf spec's from super-classes.
    */
-  AnnotationInfo getInheritedAnnotation(Symbol sym, VisitorState state) {
+  static AnnotationInfo getInheritedAnnotation(Symbol sym, VisitorState state) {
     if (!(sym instanceof ClassSymbol)) {
       return null;
     }
-    for (String immutableType : immutableAnnotations) {
-      Compound attr = sym.attribute(state.getSymbolFromString(immutableType));
-      if (attr != null) {
-        return AnnotationInfo.create(sym.getQualifiedName().toString(), containerOf(state, attr));
-      }
+    Compound attr = sym.attribute(state.getSymbolFromString(Immutable.class.getName()));
+    if (attr != null) {
+      return AnnotationInfo.create(sym.getQualifiedName().toString(), containerOf(state, attr));
     }
     // @Immutable is inherited from supertypes
     Type superClass = ((ClassSymbol) sym).getSuperclass();

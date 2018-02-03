@@ -34,7 +34,6 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 import java.util.List;
-import javax.annotation.Nullable;
 
 /** @author cushon@google.com (Liam Miller-Cushon) */
 @BugPattern(
@@ -45,18 +44,15 @@ import javax.annotation.Nullable;
   tags = StandardTags.FRAGILE_CODE
 )
 public class ExpectedExceptionChecker extends AbstractExpectedExceptionChecker {
+
   @Override
   protected Description handleMatch(
-      MethodTree tree,
-      VisitorState state,
-      List<Tree> expectations,
-      List<StatementTree> suffix,
-      @Nullable StatementTree failure) {
+      MethodTree tree, VisitorState state, List<Tree> expectations, List<StatementTree> suffix) {
     if (suffix.size() <= 1) {
       // for now, allow ExpectedException as long as it's testing that exactly one statement throws
       return NO_MATCH;
     }
-    BaseFix baseFix = buildBaseFix(state, expectations, failure);
+    BaseFix baseFix = buildBaseFix(state, expectations);
     // provide fixes to wrap each of the trailing statements in a lambda
     // skip statements that look like assertions
     ImmutableList<Fix> fixes =

@@ -141,8 +141,7 @@ public class ImmutableEnumCheckerTest {
             "enum Enum {",
             "  ONE(new Foo()), TWO(new Foo());",
             "  // BUG: Diagnostic contains:"
-                + " the declaration of type 'Foo' is not annotated with"
-                + " @com.google.errorprone.annotations.Immutable",
+                + " the declaration of type 'Foo' is not annotated @Immutable",
             "  final Foo f;",
             "  private Enum(Foo f) {",
             "    this.f = f;",
@@ -161,60 +160,6 @@ public class ImmutableEnumCheckerTest {
             "  ONE;",
             "  @SuppressWarnings(\"Immutable\")",
             "  final int[] xs = {1};",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void enumInstanceSuperMutable() {
-    compilationHelper
-        .addSourceLines(
-            "Test.java", //
-            "enum Test {",
-            "  ONE {",
-            "    int incr() {",
-            "      return x++;",
-            "    }",
-            "  };",
-            "  abstract int incr();",
-            "  // BUG: Diagnostic contains: non-final",
-            "  int x;",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void enumInstanceMutable() {
-    compilationHelper
-        .addSourceLines(
-            "Test.java", //
-            "enum Test {",
-            "  ONE {",
-            "    // BUG: Diagnostic contains: non-final",
-            "    int x;",
-            "    int incr() {",
-            "      return x++;",
-            "    }",
-            "  };",
-            "  abstract int incr();",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void jucImmutable() {
-    compilationHelper
-        .addSourceLines(
-            "Lib.java", //
-            "import javax.annotation.concurrent.Immutable;",
-            "@Immutable",
-            "class Lib {",
-            "}")
-        .addSourceLines(
-            "Test.java", //
-            "enum Test {",
-            "  ONE;",
-            "  final Lib l = new Lib();",
             "}")
         .doTest();
   }

@@ -157,7 +157,6 @@ public final class WellKnownMutability {
         .add(com.google.common.hash.HashCode.class)
         .add(com.google.common.io.BaseEncoding.class)
         .add(com.google.common.net.MediaType.class)
-        .add(com.google.common.primitives.UnsignedInteger.class)
         .add(com.google.common.primitives.UnsignedLong.class)
         .add(java.lang.Class.class)
         .add(java.lang.String.class)
@@ -269,9 +268,6 @@ public final class WellKnownMutability {
         .add("org.joda.time.LocalDateTime")
         .add("org.joda.time.Period")
         .add("org.joda.time.format.DateTimeFormatter")
-        .add("org.openqa.selenium.Dimension")
-        .add("org.openqa.selenium.DeviceRotation")
-        .add("org.openqa.selenium.ImmutableCapabilities")
         .build();
   }
 

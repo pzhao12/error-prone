@@ -45,8 +45,7 @@ public class TermEditDistance {
 
   public TermEditDistance() {
     this(
-        (s, t) ->
-            (double) LevenshteinEditDistance.getEditDistance(s, t, /* caseSensitive= */ false),
+        (s, t) -> (double) LevenshteinEditDistance.getEditDistance(s, t, /*isCaseSensitive*/ false),
         (s, t) -> (double) LevenshteinEditDistance.getWorstCaseEditDistance(s, t));
   }
 

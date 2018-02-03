@@ -31,7 +31,7 @@ public abstract class Commented<T extends Tree> {
 
   public abstract ImmutableList<Comment> afterComments();
 
-  static <T extends Tree> Builder<T> builder() {
+  static <T extends Tree> Builder builder() {
     return new AutoValue_Commented.Builder<T>();
   }
 

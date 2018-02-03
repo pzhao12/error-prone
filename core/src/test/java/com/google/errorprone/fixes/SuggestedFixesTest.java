@@ -18,8 +18,6 @@ package com.google.errorprone.fixes;
 
 import static com.google.errorprone.BugCheckerRefactoringTestHelper.TestMode.TEXT_MATCH;
 import static com.google.errorprone.BugPattern.Category.JDK;
-import static com.google.errorprone.BugPattern.Category.ONE_OFF;
-import static com.google.errorprone.BugPattern.ProvidesFix.REQUIRES_HUMAN_ATTENTION;
 import static com.google.errorprone.BugPattern.SeverityLevel.ERROR;
 import static com.google.errorprone.matchers.Description.NO_MATCH;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -31,6 +29,7 @@ import com.google.errorprone.BugCheckerRefactoringTestHelper;
 import com.google.errorprone.BugCheckerRefactoringTestHelper.TestMode;
 import com.google.errorprone.BugPattern;
 import com.google.errorprone.BugPattern.Category;
+import com.google.errorprone.BugPattern.SeverityLevel;
 import com.google.errorprone.CompilationTestHelper;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
@@ -56,7 +55,6 @@ import com.sun.tools.javac.tree.DCTree;
 import com.sun.tools.javac.tree.JCTree;
 import java.io.IOException;
 import java.lang.annotation.Retention;
-import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,9 +78,9 @@ public class SuggestedFixesTest {
 
   @BugPattern(
     name = "EditModifiers",
-    category = ONE_OFF,
+    category = Category.ONE_OFF,
     summary = "Edits modifiers",
-    severity = ERROR
+    severity = SeverityLevel.ERROR
   )
   public static class EditModifiersChecker extends BugChecker
       implements VariableTreeMatcher, MethodTreeMatcher {
@@ -113,7 +111,7 @@ public class SuggestedFixesTest {
               ASTHelpers.findEnclosingNode(state.getPath(), ClassTree.class), EditModifiers.class);
       Modifier mod = MODIFIERS_BY_NAME.get(editModifiers.value());
       Verify.verifyNotNull(mod, editModifiers.value());
-      Optional<SuggestedFix> fix;
+      Fix fix;
       switch (editModifiers.kind()) {
         case ADD:
           fix = SuggestedFixes.addModifiers(tree, state, mod);
@@ -233,11 +231,10 @@ public class SuggestedFixesTest {
   }
 
   @BugPattern(
-    category = ONE_OFF,
+    category = Category.ONE_OFF,
     name = "CastReturn",
-    severity = ERROR,
-    summary = "Adds casts to returned expressions",
-    providesFix = REQUIRES_HUMAN_ATTENTION
+    severity = SeverityLevel.ERROR,
+    summary = "Adds casts to returned expressions"
   )
   public static class CastReturn extends BugChecker implements ReturnTreeMatcher {
 
@@ -257,11 +254,10 @@ public class SuggestedFixesTest {
   }
 
   @BugPattern(
-    category = ONE_OFF,
+    category = Category.ONE_OFF,
     name = "CastReturn",
-    severity = ERROR,
-    summary = "Adds casts to returned expressions",
-    providesFix = REQUIRES_HUMAN_ATTENTION
+    severity = SeverityLevel.ERROR,
+    summary = "Adds casts to returned expressions"
   )
   public static class CastReturnFullType extends BugChecker implements ReturnTreeMatcher {
 
@@ -394,252 +390,12 @@ public class SuggestedFixesTest {
         .doTest();
   }
 
-  /** A test check that adds an annotation to all return types. */
-  @BugPattern(
-    name = "AddAnnotation",
-    category = Category.JDK,
-    summary = "Add an annotation",
-    severity = ERROR,
-    providesFix = REQUIRES_HUMAN_ATTENTION
-  )
-  public static class AddAnnotation extends BugChecker implements BugChecker.MethodTreeMatcher {
-    @Override
-    public Description matchMethod(MethodTree tree, VisitorState state) {
-      Type type = state.getTypeFromString("some.pkg.SomeAnnotation");
-      SuggestedFix.Builder builder = SuggestedFix.builder();
-      String qualifiedName = SuggestedFixes.qualifyType(state, builder, type);
-      return describeMatch(
-          tree.getReturnType(),
-          builder.prefixWith(tree.getReturnType(), "@" + qualifiedName + " ").build());
-    }
-
-    private static BugCheckerRefactoringTestHelper testHelper(
-        Class<? extends SuggestedFixesTest> clazz) {
-      return BugCheckerRefactoringTestHelper.newInstance(new AddAnnotation(), clazz)
-          .addInputLines(
-              "in/some/pkg/SomeAnnotation.java",
-              "package some.pkg;",
-              "public @interface SomeAnnotation {}")
-          .expectUnchanged();
-    }
-  }
-
-  @Test
-  public void qualifyType_alreadyImported() throws Exception {
-    AddAnnotation.testHelper(getClass())
-        .addInputLines(
-            "in/AddAnnotation.java",
-            "import some.pkg.SomeAnnotation;",
-            "class AddAnnotation {",
-            "  @SomeAnnotation Void nullable = null;",
-            "  Void foo() { return null; }",
-            "}")
-        .addOutputLines(
-            "out/AddAnnotation.java",
-            "import some.pkg.SomeAnnotation;",
-            "class AddAnnotation {",
-            "  @SomeAnnotation Void nullable = null;",
-            "  @SomeAnnotation Void foo() { return null; }",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void qualifyType_importType() throws Exception {
-    AddAnnotation.testHelper(getClass())
-        .addInputLines(
-            "in/AddAnnotation.java", "class AddAnnotation {", "  Void foo() { return null; }", "}")
-        .addOutputLines(
-            "out/AddAnnotation.java",
-            "import some.pkg.SomeAnnotation;",
-            "class AddAnnotation {",
-            "  @SomeAnnotation Void foo() { return null; }",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void qualifyType_someOtherNullable() throws Exception {
-    AddAnnotation.testHelper(getClass())
-        .addInputLines("in/SomeAnnotation.java", "@interface SomeAnnotation {}")
-        .expectUnchanged()
-        .addInputLines(
-            "in/AddAnnotation.java",
-            "class AddAnnotation {",
-            "  @SomeAnnotation Void foo() { return null; }",
-            "}")
-        .addOutputLines(
-            "out/AddAnnotation.java",
-            "class AddAnnotation {",
-            "  @SomeAnnotation @some.pkg.SomeAnnotation Void foo() { return null; }",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void qualifyType_nestedNullable() throws Exception {
-    AddAnnotation.testHelper(getClass())
-        .addInputLines(
-            "in/AddAnnotation.java",
-            "class AddAnnotation {",
-            "  Void foo() { return null; }",
-            "  @interface SomeAnnotation {}",
-            "}")
-        .addOutputLines(
-            "out/AddAnnotation.java",
-            "class AddAnnotation {",
-            "  @some.pkg.SomeAnnotation Void foo() { return null; }",
-            "  @interface SomeAnnotation {}",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void qualifyType_deeplyNestedNullable() throws Exception {
-    AddAnnotation.testHelper(getClass())
-        .addInputLines(
-            "in/AddAnnotation.java",
-            "class AddAnnotation {",
-            "  Void foo() { return null; }",
-            "  static class Nested {",
-            "    Void bar() { return null; }",
-            "    @interface SomeAnnotation {}",
-            "  }",
-            "}")
-        .addOutputLines(
-            "out/AddAnnotation.java",
-            "import some.pkg.SomeAnnotation;",
-            "class AddAnnotation {",
-            "  @SomeAnnotation Void foo() { return null; }",
-            "  static class Nested {",
-            "    @some.pkg.SomeAnnotation Void bar() { return null; }",
-            "    @interface SomeAnnotation {}",
-            "  }",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void qualifyType_someOtherNullableSomeOtherPackage() throws Exception {
-    AddAnnotation.testHelper(getClass())
-        .addInputLines(
-            "in/SomeAnnotation.java", "package foo.bar;", "public @interface SomeAnnotation {}")
-        .expectUnchanged()
-        .addInputLines(
-            "in/AddAnnotation.java",
-            "import foo.bar.SomeAnnotation;",
-            "class AddAnnotation {",
-            "  @SomeAnnotation Void foo() { return null; }",
-            "}")
-        .addOutputLines(
-            "out/AddAnnotation.java",
-            "import foo.bar.SomeAnnotation;",
-            "class AddAnnotation {",
-            "  @SomeAnnotation @some.pkg.SomeAnnotation Void foo() { return null; }",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void qualifyType_typeVariable() throws Exception {
-    AddAnnotation.testHelper(getClass())
-        .addInputLines(
-            "in/AddAnnotation.java",
-            "class AddAnnotation {",
-            "  <SomeAnnotation> Void foo() { return null; }",
-            "}")
-        .addOutputLines(
-            "out/AddAnnotation.java",
-            "class AddAnnotation {",
-            "  <SomeAnnotation> @some.pkg.SomeAnnotation Void foo() { return null; }",
-            "}")
-        .doTest();
-  }
-
-  /** A test check that replaces all methods' return types with a given type. */
-  @BugPattern(
-    name = "ReplaceReturnType",
-    category = Category.JDK,
-    summary = "Change the method return type",
-    severity = ERROR,
-    providesFix = REQUIRES_HUMAN_ATTENTION
-  )
-  public static class ReplaceReturnType extends BugChecker implements BugChecker.MethodTreeMatcher {
-    private final String newReturnType;
-
-    public ReplaceReturnType(String newReturnType) {
-      this.newReturnType = newReturnType;
-    }
-
-    @Override
-    public Description matchMethod(MethodTree tree, VisitorState state) {
-      Type type = state.getTypeFromString(newReturnType);
-      SuggestedFix.Builder builder = SuggestedFix.builder();
-      String qualifiedName = SuggestedFixes.qualifyType(state, builder, type);
-      return describeMatch(
-          tree.getReturnType(), builder.replace(tree.getReturnType(), qualifiedName).build());
-    }
-  }
-
-  @Test
-  public void qualifyType_nestedType() throws Exception {
-    BugCheckerRefactoringTestHelper.newInstance(
-            new ReplaceReturnType("pkg.Outer.Inner"), getClass())
-        .addInputLines(
-            "in/pkg/Outer.java",
-            "package pkg;",
-            "public class Outer {",
-            "  public class Inner {}",
-            "}")
-        .expectUnchanged()
-        .addInputLines(
-            "in/ReplaceReturnType.java",
-            "class ReplaceReturnType {",
-            "  Void foo() { return null; }",
-            "}")
-        .addOutputLines(
-            "out/ReplaceReturnType.java",
-            "import pkg.Outer;",
-            "class ReplaceReturnType {",
-            "  Outer.Inner foo() { return null; }",
-            "}")
-        .doTest();
-  }
-
-  @Test
-  public void qualifyType_deeplyNestedType() throws Exception {
-    BugCheckerRefactoringTestHelper.newInstance(
-            new ReplaceReturnType("pkg.Outer.Inner.Innermost"), getClass())
-        .addInputLines(
-            "in/pkg/Outer.java",
-            "package pkg;",
-            "public class Outer {",
-            "  public class Inner {",
-            "    public class Innermost {}",
-            "  }",
-            "}")
-        .expectUnchanged()
-        .addInputLines(
-            "in/ReplaceReturnType.java",
-            "class ReplaceReturnType {",
-            "  Void foo() { return null; }",
-            "}")
-        .addOutputLines(
-            "out/ReplaceReturnType.java",
-            "import pkg.Outer;",
-            "class ReplaceReturnType {",
-            "  Outer.Inner.Innermost foo() { return null; }",
-            "}")
-        .doTest();
-  }
-
   /** A test check that qualifies javadoc link. */
   @BugPattern(
     name = "JavadocQualifier",
-    category = Category.JDK,
+    category = BugPattern.Category.JDK,
     summary = "all javadoc links should be qualified",
-    severity = ERROR,
-    providesFix = REQUIRES_HUMAN_ATTENTION
+    severity = ERROR
   )
   public static class JavadocQualifier extends BugChecker implements BugChecker.ClassTreeMatcher {
     @Override
@@ -689,13 +445,7 @@ public class SuggestedFixesTest {
         .doTest(TEXT_MATCH);
   }
 
-  @BugPattern(
-    name = "SuppressMe",
-    category = ONE_OFF,
-    summary = "",
-    severity = ERROR,
-    providesFix = REQUIRES_HUMAN_ATTENTION
-  )
+  @BugPattern(name = "SuppressMe", category = Category.ONE_OFF, summary = "", severity = ERROR)
   static final class SuppressMe extends BugChecker implements LiteralTreeMatcher {
     @Override
     public Description matchLiteral(LiteralTree tree, VisitorState state) {
@@ -747,13 +497,7 @@ public class SuggestedFixesTest {
   }
 
   /** A test bugchecker that deletes any field whose removal doesn't break the compilation. */
-  @BugPattern(
-    name = "CompilesWithFixChecker",
-    category = JDK,
-    summary = "",
-    severity = ERROR,
-    providesFix = REQUIRES_HUMAN_ATTENTION
-  )
+  @BugPattern(name = "CompilesWithFixChecker", category = JDK, summary = "", severity = ERROR)
   public static class CompilesWithFixChecker extends BugChecker implements VariableTreeMatcher {
     @Override
     public Description matchVariable(VariableTree tree, VisitorState state) {
@@ -788,13 +532,7 @@ public class SuggestedFixesTest {
   }
 
   /** A test bugchecker that deletes an exception from throws. */
-  @BugPattern(
-    name = "RemovesExceptionChecker",
-    category = JDK,
-    summary = "",
-    severity = ERROR,
-    providesFix = REQUIRES_HUMAN_ATTENTION
-  )
+  @BugPattern(name = "RemovesExceptionChecker", category = JDK, summary = "", severity = ERROR)
   public static class RemovesExceptionsChecker extends BugChecker implements MethodTreeMatcher {
 
     private final int index;

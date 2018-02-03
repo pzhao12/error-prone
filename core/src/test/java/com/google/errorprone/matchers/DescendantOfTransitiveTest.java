@@ -114,7 +114,6 @@ public class DescendantOfTransitiveTest extends DescendantOfAbstractTest {
     clearSourceFiles();
     writeFileToLocalDisk(
         "C.java", "public class C {", "  public void test(b.B b) {", "    b.count();", "  }", "}");
-    assertCompilesWithLocalDisk(
-        memberSelectMatches(/* shouldMatch= */ true, new DescendantOf("i.I1", "count()")));
+    assertCompilesWithLocalDisk(memberSelectMatches(true, new DescendantOf("i.I1", "count()")));
   }
 }

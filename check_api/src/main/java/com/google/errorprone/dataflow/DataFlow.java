@@ -124,24 +124,19 @@ public final class DataFlow {
   // TODO(user), remove once we merge jdk8 specific's with core
   private static <T> TreePath findEnclosingMethodOrLambdaOrInitializer(TreePath path) {
     while (path != null) {
-      if (path.getLeaf() instanceof MethodTree) {
+      if (path.getLeaf() instanceof MethodTree || path.getLeaf() instanceof LambdaExpressionTree) {
         return path;
       }
       TreePath parent = path.getParentPath();
-      if (parent != null) {
-        if (parent.getLeaf() instanceof ClassTree) {
-          if (path.getLeaf() instanceof BlockTree) {
-            // this is a class or instance initializer block
-            return path;
-          }
-          if (path.getLeaf() instanceof VariableTree
-              && ((VariableTree) path.getLeaf()).getInitializer() != null) {
-            // this is a field with an inline initializer
-            return path;
-          }
+      if (parent != null && parent.getLeaf() instanceof ClassTree) {
+        if (path.getLeaf() instanceof BlockTree) {
+          // this is a class or instance initializer block
+          return path;
         }
-        if (parent.getLeaf() instanceof LambdaExpressionTree) {
-          return parent;
+        if (path.getLeaf() instanceof VariableTree
+            && ((VariableTree) path.getLeaf()).getInitializer() != null) {
+          // this is a field with an inline initializer
+          return path;
         }
       }
       path = parent;

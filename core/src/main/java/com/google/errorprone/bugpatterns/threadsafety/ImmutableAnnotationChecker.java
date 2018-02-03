@@ -24,7 +24,6 @@ import static com.google.errorprone.util.ASTHelpers.getType;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.BugPattern;
-import com.google.errorprone.BugPattern.ProvidesFix;
 import com.google.errorprone.BugPattern.StandardTags;
 import com.google.errorprone.ErrorProneFlags;
 import com.google.errorprone.VisitorState;
@@ -47,14 +46,12 @@ import java.util.Optional;
   category = JDK,
   summary = "Annotations should always be immutable",
   severity = WARNING,
-  tags = StandardTags.LIKELY_ERROR,
-  providesFix = ProvidesFix.REQUIRES_HUMAN_ATTENTION
+  tags = StandardTags.LIKELY_ERROR
 )
 public class ImmutableAnnotationChecker extends BugChecker implements ClassTreeMatcher {
 
   public static final String ANNOTATED_ANNOTATION_MESSAGE =
-      "annotations are immutable by default; annotating them with"
-          + " @com.google.errorprone.annotations.Immutable is unnecessary";
+      "annotations are immutable by default; annotating them with @Immutable is unnecessary";
 
   private final WellKnownMutability wellKnownMutability;
 
@@ -96,10 +93,7 @@ public class ImmutableAnnotationChecker extends BugChecker implements ClassTreeM
                 state,
                 wellKnownMutability,
                 "annotations should be immutable, and cannot have non-final fields",
-                "annotations should be immutable",
-                ImmutableSet.of(
-                    Immutable.class.getName(),
-                    javax.annotation.concurrent.Immutable.class.getName()))
+                "annotations should be immutable")
             .checkForImmutability(Optional.of(tree), ImmutableSet.of(), getType(tree));
 
     if (!info.isPresent()) {

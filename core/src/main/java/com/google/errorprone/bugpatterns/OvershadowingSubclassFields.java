@@ -47,14 +47,14 @@ import javax.lang.model.element.Name;
  * @author mariasam@google.com (Maria Sam)
  */
 @BugPattern(
-  name = "HidingField",
+  name = "OvershadowingSubclassFields",
   category = JDK,
-  summary = "Hiding fields of superclasses may cause confusion and errors",
+  summary = "Overshadowing variables of superclass causes confusion and errors",
   severity = WARNING,
-  altNames = {"hiding", "OvershadowingSubclassFields"}
+  altNames = "hiding"
 )
-public class HidingField extends BugChecker implements ClassTreeMatcher {
-  // List of types that are allowed to hide superclass fields
+public class OvershadowingSubclassFields extends BugChecker implements ClassTreeMatcher {
+  // List of types of variables that are allowed to shadow superclass variables
   private static final ImmutableSet<String> IGNORED_CLASSES =
       ImmutableSet.of("com.google.common.GoogleLogger", "java.util.logging.Logger");
 
@@ -85,9 +85,9 @@ public class HidingField extends BugChecker implements ClassTreeMatcher {
               .filter(mem -> (mem instanceof VarSymbol))
               .map(mem -> (VarSymbol) mem)
               .filter(mem -> (!mem.isPrivate() && !mem.getModifiers().contains(Modifier.STATIC)))
-              .collect(Collectors.toMap(Symbol::getSimpleName, mem -> mem));
+              .collect(Collectors.toMap(mem -> mem.getSimpleName(), mem -> mem));
 
-      checkForHiddenFields(
+      checkForOvershadowedVariables(
           originalClassMembers,
           parentMembers,
           parentSymbol.getSimpleName(),
@@ -100,7 +100,7 @@ public class HidingField extends BugChecker implements ClassTreeMatcher {
     return Description.NO_MATCH;
   }
 
-  private void checkForHiddenFields(
+  private void checkForOvershadowedVariables(
       List<VariableTree> originalClassMembers,
       Map<Name, VarSymbol> parentMembers,
       Name parentClassName,
@@ -121,8 +121,8 @@ public class HidingField extends BugChecker implements ClassTreeMatcher {
         Builder matchDesc = buildDescription(origVariable);
 
         matchDesc.setMessage(
-            "Hiding fields of superclasses may cause confusion and errors. "
-                + "This field is hiding a field of the same name in superclass: "
+            "Overshadowing variables of superclass causes confusion and errors. "
+                + "This variable is overshadowing a variable in superclass:  "
                 + parentClassName);
 
         visitorState.reportMatch(matchDesc.build());

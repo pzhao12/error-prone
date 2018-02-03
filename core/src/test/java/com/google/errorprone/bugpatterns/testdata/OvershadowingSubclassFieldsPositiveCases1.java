@@ -19,7 +19,7 @@ package com.google.errorprone.bugpatterns.testdata;
  * @author sulku@google.com (Marsela Sulku)
  * @author mariasam@google.com (Maria Sam)
  */
-public class HidingFieldPositiveCases1 {
+public class OvershadowingSubclassFieldsPositiveCases1 {
 
   /** base class */
   public static class ClassA {
@@ -31,21 +31,25 @@ public class HidingFieldPositiveCases1 {
 
   /** ClassB has a variable name as parent */
   public static class ClassB extends ClassA {
-    // BUG: Diagnostic contains: superclass: ClassA
+    // BUG: Diagnostic contains: Overshadowing variables of superclass causes confusion and errors.
+    // This variable is overshadowing a variable in superclass:  ClassA
     private String varOne = "Test";
   }
 
   /** ClassC has same variable name as grandparent */
   public static class ClassC extends ClassB {
-    // BUG: Diagnostic contains: superclass: ClassA
+    // BUG: Diagnostic contains: Overshadowing variables of superclass causes confusion and errors.
+    // This variable is overshadowing a variable in superclass:  ClassA
     public int varTwo;
   }
 
   /** ClassD has same variable name as grandparent and other unrelated members */
   public static class ClassD extends ClassB {
-    // BUG: Diagnostic contains: superclass: ClassA
+    // BUG: Diagnostic contains: Overshadowing variables of superclass causes confusion and errors.
+    // This variable is overshadowing a variable in superclass:  ClassA
     protected int varThree;
-    // BUG: Diagnostic contains: superclass: ClassA
+    // BUG: Diagnostic contains: Overshadowing variables of superclass causes confusion and errors.
+    // This variable is overshadowing a variable in superclass:  ClassA
     int varTwo;
     String randOne;
     String randTwo;
@@ -53,17 +57,19 @@ public class HidingFieldPositiveCases1 {
 
   /** ClassE has same variable name as grandparent */
   public static class ClassE extends ClassC {
-    // BUG: Diagnostic contains: superclass: ClassC
+    // BUG: Diagnostic contains: Overshadowing variables of superclass causes confusion and errors.
+    // This variable is overshadowing a variable in superclass:  ClassC
     public String varTwo;
   }
 
   public static class ClassF extends ClassA {
-    @SuppressWarnings("HidingField") // no warning because it's suppressed
+    @SuppressWarnings("OvershadowingSubclassFields") // no warning because it's suppressed
     public String varThree;
   }
 
   public static class ClassG extends ClassF {
-    // BUG: Diagnostic contains: superclass: ClassF
+    // BUG: Diagnostic contains: Overshadowing variables of superclass causes confusion and errors.
+    // This variable is overshadowing a variable in superclass:  ClassF
     String varThree;
   }
 }

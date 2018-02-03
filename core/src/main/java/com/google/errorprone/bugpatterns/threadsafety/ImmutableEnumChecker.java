@@ -25,7 +25,6 @@ import static com.google.errorprone.util.ASTHelpers.getType;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.errorprone.BugPattern;
-import com.google.errorprone.BugPattern.ProvidesFix;
 import com.google.errorprone.ErrorProneFlags;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.annotations.Immutable;
@@ -47,14 +46,12 @@ import java.util.stream.Stream;
   altNames = "Immutable",
   category = JDK,
   summary = "Enums should always be immutable",
-  severity = WARNING,
-  providesFix = ProvidesFix.REQUIRES_HUMAN_ATTENTION
+  severity = WARNING
 )
 public class ImmutableEnumChecker extends BugChecker implements ClassTreeMatcher {
 
   public static final String ANNOTATED_ENUM_MESSAGE =
-      "enums are immutable by default; annotating them with"
-          + " @com.google.errorprone.annotations.Immutable is unnecessary";
+      "enums are immutable by default; annotating them with @Immutable is unnecessary";
 
   private final WellKnownMutability wellKnownMutability;
 
@@ -95,10 +92,7 @@ public class ImmutableEnumChecker extends BugChecker implements ClassTreeMatcher
                 state,
                 wellKnownMutability,
                 "enums should be immutable, and cannot have non-final fields",
-                "enums should only have immutable fields",
-                ImmutableSet.of(
-                    Immutable.class.getName(),
-                    javax.annotation.concurrent.Immutable.class.getName()))
+                "enums should only have immutable fields")
             .checkForImmutability(Optional.of(tree), ImmutableSet.of(), getType(tree));
 
     if (!info.isPresent()) {

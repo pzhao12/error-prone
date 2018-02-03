@@ -60,12 +60,7 @@ public class GuardedByUtils {
 
   public static JCTree.JCExpression parseString(String guardedByString, Context context) {
     JavacParser parser =
-        ParserFactory.instance(context)
-            .newParser(
-                guardedByString,
-                /* keepDocComments= */ false,
-                /* keepEndPos= */ true,
-                /* keepLineMap= */ false);
+        ParserFactory.instance(context).newParser(guardedByString, false, true, false);
     JCTree.JCExpression exp;
     try {
       exp = parser.parseExpression();

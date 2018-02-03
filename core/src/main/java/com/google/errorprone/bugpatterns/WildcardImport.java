@@ -172,13 +172,11 @@ public class WildcardImport extends BugChecker implements CompilationUnitTreeMat
         }
         switch (sym.kind) {
           case TYP:
-            seen.add(
-                TypeToImport.create(sym.getSimpleName().toString(), sym.owner, /* stat= */ false));
+            seen.add(TypeToImport.create(sym.getSimpleName().toString(), sym.owner, false));
             break;
           case VAR:
           case MTH:
-            seen.add(
-                TypeToImport.create(sym.getSimpleName().toString(), sym.owner, /* stat= */ true));
+            seen.add(TypeToImport.create(sym.getSimpleName().toString(), sym.owner, true));
             break;
           default:
             return;

@@ -114,8 +114,7 @@ abstract class AbstractJUnit4InitMethodNotRun extends BugChecker implements Meth
       if (annotationClassName.endsWith("." + unqualifiedClassName)) {
         SuggestedFix.Builder suggestedFix =
             SuggestedFix.builder().removeImport(annotationClassName).addImport(correctAnnotation);
-        if (makeProtectedPublic(
-                methodTree, state, unqualifiedClassName, suggestedFix, /* addAnnotation= */ false)
+        if (makeProtectedPublic(methodTree, state, unqualifiedClassName, suggestedFix, false)
             == null) {
           // No source position available, don't suggest a fix
           return describeMatch(annotationNode);
@@ -131,8 +130,7 @@ abstract class AbstractJUnit4InitMethodNotRun extends BugChecker implements Meth
 
     // The makeProtectedPublic will take care of adding the annotation for us
     Boolean annotationAdded =
-        makeProtectedPublic(
-            methodTree, state, unqualifiedClassName, suggestedFix, /* addAnnotation= */ true);
+        makeProtectedPublic(methodTree, state, unqualifiedClassName, suggestedFix, true);
     //
     if (annotationAdded == null) {
       // No source position available, don't suggest a fix

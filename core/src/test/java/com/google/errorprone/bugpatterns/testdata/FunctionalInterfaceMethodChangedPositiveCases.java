@@ -16,7 +16,6 @@
 
 package com.google.errorprone.bugpatterns.testdata;
 
-
 public class FunctionalInterfaceMethodChangedPositiveCases {
   @FunctionalInterface
   interface SuperFI {
@@ -90,19 +89,6 @@ public class FunctionalInterfaceMethodChangedPositiveCases {
     default String superSam() {
       System.out.println("do something else");
       return subSam();
-    }
-  }
-
-  @FunctionalInterface
-  public interface ValueReturningSubFI2 extends ValueReturningSuperFI {
-
-    String subSam();
-
-    @Override
-    // BUG: Diagnostic contains:
-    default String superSam() {
-      subSam();
-      return null;
     }
   }
 }

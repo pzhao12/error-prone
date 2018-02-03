@@ -462,8 +462,7 @@ public class ASTHelpers {
           && !sym.isStatic()
           && ((sym.flags() & Flags.SYNTHETIC) == 0)
           && sym.name.contentEquals(methodSymbol.name)
-          && methodSymbol.overrides(
-              sym, (TypeSymbol) methodSymbol.owner, types, /* checkResult= */ true)) {
+          && methodSymbol.overrides(sym, (TypeSymbol) methodSymbol.owner, types, true)) {
         return (MethodSymbol) sym;
       }
     }
@@ -471,7 +470,7 @@ public class ASTHelpers {
   }
 
   public static Set<MethodSymbol> findSuperMethods(MethodSymbol methodSymbol, Types types) {
-    return findSuperMethods(methodSymbol, types, /* skipInterfaces= */ false)
+    return findSuperMethods(methodSymbol, types, false)
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
@@ -480,7 +479,7 @@ public class ASTHelpers {
    * method}.
    */
   public static Optional<MethodSymbol> findSuperMethod(MethodSymbol methodSymbol, Types types) {
-    return findSuperMethods(methodSymbol, types, /* skipInterfaces= */ true).findFirst();
+    return findSuperMethods(methodSymbol, types, true).findFirst();
   }
 
   private static Stream<MethodSymbol> findSuperMethods(
@@ -534,8 +533,7 @@ public class ASTHelpers {
     Name annotationName = state.getName(annotationClass);
     Symbol annotationSym;
     synchronized (state.context) {
-      annotationSym =
-          state.getSymtab().enterClass(state.inferModule(annotationName), annotationName);
+      annotationSym = state.getSymtab().enterClass(state.getSymtab().java_base, annotationName);
     }
     try {
       annotationSym.complete();

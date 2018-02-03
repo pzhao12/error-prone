@@ -41,8 +41,7 @@ public class MethodReturnsNonNullNextTokenTest extends CompilerBasedAbstractTest
         "    st.nextToken();",
         "  }",
         "}");
-    assertCompiles(
-        methodInvocationMatches(/* shouldMatch= */ true, Matchers.methodReturnsNonNull()));
+    assertCompiles(methodInvocationMatches(true, Matchers.methodReturnsNonNull()));
   }
 
   @Test
@@ -56,8 +55,7 @@ public class MethodReturnsNonNullNextTokenTest extends CompilerBasedAbstractTest
         "    st.hasMoreTokens();",
         "  }",
         "}");
-    assertCompiles(
-        methodInvocationMatches(/* shouldMatch= */ false, Matchers.methodReturnsNonNull()));
+    assertCompiles(methodInvocationMatches(false, Matchers.methodReturnsNonNull()));
   }
 
   @Test
@@ -77,8 +75,7 @@ public class MethodReturnsNonNullNextTokenTest extends CompilerBasedAbstractTest
         "    nextToken();",
         "  }",
         "}");
-    assertCompiles(
-        methodInvocationMatches(/* shouldMatch= */ false, Matchers.methodReturnsNonNull()));
+    assertCompiles(methodInvocationMatches(false, Matchers.methodReturnsNonNull()));
   }
 
   private Scanner methodInvocationMatches(

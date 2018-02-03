@@ -61,12 +61,9 @@ public class MethodHasParametersTest extends CompilerBasedAbstractTest {
         "A.java", "package com.google;", "public class A {", "  public void A(int i) {}", "}");
     assertCompiles(
         methodMatches(
-            /* shouldMatch= */ true,
-            new MethodHasParameters(AT_LEAST_ONE, variableType(isPrimitiveType()))));
+            true, new MethodHasParameters(AT_LEAST_ONE, variableType(isPrimitiveType()))));
     assertCompiles(
-        methodMatches(
-            /* shouldMatch= */ true,
-            new MethodHasParameters(ALL, variableType(isPrimitiveType()))));
+        methodMatches(true, new MethodHasParameters(ALL, variableType(isPrimitiveType()))));
   }
 
   @Test
@@ -74,12 +71,9 @@ public class MethodHasParametersTest extends CompilerBasedAbstractTest {
     writeFile("A.java", "package com.google;", "public class A {", "  public void A() {}", "}");
     assertCompiles(
         methodMatches(
-            /* shouldMatch= */ false,
-            new MethodHasParameters(AT_LEAST_ONE, variableType(isPrimitiveType()))));
+            false, new MethodHasParameters(AT_LEAST_ONE, variableType(isPrimitiveType()))));
     assertCompiles(
-        methodMatches(
-            /* shouldMatch= */ true,
-            new MethodHasParameters(ALL, variableType(isPrimitiveType()))));
+        methodMatches(true, new MethodHasParameters(ALL, variableType(isPrimitiveType()))));
   }
 
   @Test
@@ -88,12 +82,9 @@ public class MethodHasParametersTest extends CompilerBasedAbstractTest {
         "A.java", "package com.google;", "public class A {", "  public void A(Object obj) {}", "}");
     assertCompiles(
         methodMatches(
-            /* shouldMatch= */ false,
-            new MethodHasParameters(AT_LEAST_ONE, variableType(isPrimitiveType()))));
+            false, new MethodHasParameters(AT_LEAST_ONE, variableType(isPrimitiveType()))));
     assertCompiles(
-        methodMatches(
-            /* shouldMatch= */ false,
-            new MethodHasParameters(ALL, variableType(isPrimitiveType()))));
+        methodMatches(false, new MethodHasParameters(ALL, variableType(isPrimitiveType()))));
   }
 
   @Test
@@ -106,12 +97,9 @@ public class MethodHasParametersTest extends CompilerBasedAbstractTest {
         "}");
     assertCompiles(
         methodMatches(
-            /* shouldMatch= */ true,
-            new MethodHasParameters(AT_LEAST_ONE, variableType(isPrimitiveType()))));
+            true, new MethodHasParameters(AT_LEAST_ONE, variableType(isPrimitiveType()))));
     assertCompiles(
-        methodMatches(
-            /* shouldMatch= */ false,
-            new MethodHasParameters(ALL, variableType(isPrimitiveType()))));
+        methodMatches(false, new MethodHasParameters(ALL, variableType(isPrimitiveType()))));
   }
 
   private abstract class ScannerTest extends Scanner {
