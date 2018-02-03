@@ -162,6 +162,7 @@ import com.google.errorprone.bugpatterns.PreconditionsInvalidPlaceholder;
 import com.google.errorprone.bugpatterns.PredicateIncompatibleType;
 import com.google.errorprone.bugpatterns.PrimitiveArrayPassedToVarargsMethod;
 import com.google.errorprone.bugpatterns.PrivateConstructorForUtilityClass;
+import com.google.errorprone.bugpatterns.PrivateSecurityContractProtoAccess;
 import com.google.errorprone.bugpatterns.ProtoFieldNullComparison;
 import com.google.errorprone.bugpatterns.ProtoFieldPreconditionsCheckNotNull;
 import com.google.errorprone.bugpatterns.ProtoStringFieldReferenceEquality;
@@ -343,7 +344,6 @@ public class BuiltInCheckerSuppliers {
           DoNotCallChecker.class,
           EqualsNaN.class,
           EqualsReference.class,
-          FallThrough.class,
           FilesLinesLeak.class,
           ForOverrideChecker.class,
           FormatString.class,
@@ -376,7 +376,6 @@ public class BuiltInCheckerSuppliers {
           LiteByteStringUtf8.class,
           LoopConditionChecker.class,
           MislabeledAndroidString.class,
-          MissingCasesInEnumSwitch.class,
           MisusedWeekYear.class,
           MockitoCast.class,
           MockitoUsage.class,
@@ -396,6 +395,7 @@ public class BuiltInCheckerSuppliers {
           PreconditionsCheckNotNull.class,
           PreconditionsCheckNotNullPrimitive.class,
           PredicateIncompatibleType.class,
+          PrivateSecurityContractProtoAccess.class,
           ProtocolBufferOrdinal.class,
           ProtoFieldNullComparison.class,
           ProvidesMethodOutsideOfModule.class,
@@ -443,6 +443,7 @@ public class BuiltInCheckerSuppliers {
           DoubleCheckedLocking.class,
           EqualsHashCode.class,
           EqualsIncompatibleType.class,
+          FallThrough.class,
           Finally.class,
           FloatCast.class,
           FloatingPointLiteralPrecision.class,
@@ -467,6 +468,7 @@ public class BuiltInCheckerSuppliers {
           JUnit4ClassUsedInJUnit3.class,
           JUnitAmbiguousTestClass.class,
           LogicalAssignment.class,
+          MissingCasesInEnumSwitch.class,
           MissingFail.class,
           MissingOverride.class,
           MultipleParallelOrSequentialCalls.class,
