@@ -32,11 +32,14 @@ public class FloatCastTest {
             "class Test {",
             "  {",
             "    // BUG: Diagnostic contains:"
-                + "'int x = ((int) 0.9f) * 42;' or 'int x = (int) (0.9f * 42);'",
+                + "'int x = (int) (0.9f * 42);' or 'int x = ((int) 0.9f) * 42;'",
             "    int x = (int) 0.9f * 42;",
             "    // BUG: Diagnostic contains:"
-                + "'float y = ((int) 0.9f) * 0.9f;' or 'float y = (int) (0.9f * 0.9f);'",
+                + "'float y = (int) (0.9f * 0.9f);' or 'float y = ((int) 0.9f) * 0.9f;'",
             "    float y = (int) 0.9f * 0.9f;",
+            "    // BUG: Diagnostic contains:"
+                + "'int z = (int) (0.9f * 42 * 1 * 2);' or 'int z = ((int) 0.9f) * 42 * 1 * 2;'",
+            "    int z = (int) 0.9f * 42 * 1 * 2;",
             "  }",
             "}")
         .doTest();
@@ -55,6 +58,25 @@ public class FloatCastTest {
             "    y = (int) (0.9f * 0.9f);",
             "    String s = (int) 0.9f + \"\";",
             "    boolean b = (int) 0.9f > 1;",
+            "    long c = (long) Math.ceil(10.0d / 2) * 2;",
+            "    long f = (long) Math.floor(10.0d / 2) * 2;",
+            "    long g = (long) Math.signum(10.0d / 2) * 2;",
+            "    long r = (long) Math.rint(10.0d / 2) * 2;",
+            "  }",
+            "}")
+        .doTest();
+  }
+
+  @Test
+  public void pow() {
+    CompilationTestHelper.newInstance(FloatCast.class, getClass())
+        .addSourceLines(
+            "Test.java", //
+            "class Test {",
+            "  {",
+            "    // BUG: Diagnostic contains: 'int x = (int) (Math.pow(10, 0.5f) * 42);'",
+            "    int x = (int) Math.pow(10, 0.5f) * 42;",
+            "    int y = (int) Math.pow(10, 2) * 42;",
             "  }",
             "}")
         .doTest();

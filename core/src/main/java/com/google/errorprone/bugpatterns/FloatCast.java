@@ -18,6 +18,7 @@ package com.google.errorprone.bugpatterns;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Description.NO_MATCH;
+import static com.google.errorprone.matchers.method.MethodMatchers.staticMethod;
 import static com.google.errorprone.util.ASTHelpers.isSameType;
 
 import com.google.errorprone.BugPattern;
@@ -26,15 +27,20 @@ import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker.TypeCastTreeMatcher;
 import com.google.errorprone.fixes.SuggestedFix;
 import com.google.errorprone.matchers.Description;
+import com.google.errorprone.matchers.Matcher;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
+import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.code.Type;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.lang.model.type.TypeKind;
 
 /** @author cushon@google.com (Liam Miller-Cushon) */
@@ -49,6 +55,13 @@ public class FloatCast extends BugChecker implements TypeCastTreeMatcher {
   static final Set<TypeKind> FLOATING_POINT = EnumSet.of(TypeKind.FLOAT, TypeKind.DOUBLE);
 
   static final Set<TypeKind> INTEGRAL = EnumSet.of(TypeKind.LONG, TypeKind.INT);
+
+  static final Matcher<ExpressionTree> BLACKLIST =
+      staticMethod()
+          .onClass("java.lang.Math")
+          .withNameMatching(Pattern.compile("floor|ceil|signum|rint"));
+
+  static final Matcher<ExpressionTree> POW = staticMethod().onClass("java.lang.Math").named("pow");
 
   @Override
   public Description matchTypeCast(TypeCastTree tree, VisitorState state) {
@@ -92,13 +105,43 @@ public class FloatCast extends BugChecker implements TypeCastTreeMatcher {
       default:
         return NO_MATCH;
     }
+    if (BLACKLIST.matches(tree.getExpression(), state)) {
+      return NO_MATCH;
+    }
+    if (POW.matches(tree.getExpression(), state)) {
+      MethodInvocationTree pow = (MethodInvocationTree) tree.getExpression();
+      if (pow.getArguments()
+          .stream()
+          .map(ASTHelpers::getType)
+          .filter(x -> x != null)
+          .map(state.getTypes()::unboxedTypeOrType)
+          .map(Type::getKind)
+          .allMatch(INTEGRAL::contains)) {
+        return NO_MATCH;
+      }
+    }
+    // Find the outermost enclosing binop, to suggest e.g. `(long) (f * a * b)` instead of
+    // `(long) (f * a) * b`.
+    Tree enclosing = binop;
+    TreePath path = state.getPath().getParentPath().getParentPath();
+    while (path != null) {
+      if (!(path.getLeaf() instanceof BinaryTree)) {
+        break;
+      }
+      BinaryTree enclosingBinop = (BinaryTree) path.getLeaf();
+      if (!enclosingBinop.getLeftOperand().equals(enclosing)) {
+        break;
+      }
+      enclosing = enclosingBinop;
+      path = path.getParentPath();
+    }
     return buildDescription(tree)
-        .addFix(SuggestedFix.builder().prefixWith(tree, "(").postfixWith(tree, ")").build())
         .addFix(
             SuggestedFix.builder()
                 .prefixWith(tree.getExpression(), "(")
-                .postfixWith(parent, ")")
+                .postfixWith(enclosing, ")")
                 .build())
+        .addFix(SuggestedFix.builder().prefixWith(tree, "(").postfixWith(tree, ")").build())
         .build();
   }
 }
